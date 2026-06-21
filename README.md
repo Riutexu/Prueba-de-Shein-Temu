@@ -56,7 +56,9 @@ R: Sí. Solo usa la IP de la máquina anfitriona (ej. http://192.168.1.50:8080).
 P: El servidor no arranca, ¿qué hago?
 R: Verifica que tengas instalado Python 3.10+ y que las variables de entorno estén bien configuradas. Si el error persiste, revisa los logs en la carpeta /logs.
 
-◈ Arquitectura Limpia ◈
+---
+
+## ◈ Arquitectura Limpia ◈
 No mezclamos peras con manzanas:
 Views: Solo muestran lo que el usuario pide.
 
