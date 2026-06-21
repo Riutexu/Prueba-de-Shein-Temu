@@ -1,40 +1,22 @@
 import os
 import logging
+import threading  # Necesario para el hilo secundario
+import webbrowser # Necesario para abrir el navegador
 from logging.handlers import RotatingFileHandler
 from waitress import serve
 from app import create_app
 from app.models import Base
 from app.services.config_service import seed_defaults
 
+# Configura el entorno previo al arranque de la aplicación.
 def setup_environment():
-    # Base directories
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    dirs_to_create = [
-        os.path.join(base_dir, 'app', 'static', 'uploads'),
-        os.path.join(base_dir, 'app', 'static', 'css'),
-        os.path.join(base_dir, 'app', 'static', 'js'),
-        os.path.join(base_dir, 'app', 'static', 'fonts'),
-        os.path.join(base_dir, 'app', 'static', 'icons'),
-        os.path.join(base_dir, 'logs'),
-        os.path.join(base_dir, 'db')
-    ]
-    
-    for d in dirs_to_create:
-        os.makedirs(d, exist_ok=True)
-        
-    # Logging configuration
-    log_file = os.path.join(base_dir, 'logs', 'app.log')
-    handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-    root_logger.addHandler(handler)
-    root_logger.addHandler(console_handler)
+    """Configura variables de entorno antes de iniciar la aplicación."""
+    os.environ.setdefault('FLASK_ENV', 'production')
+
+def open_browser():
+    """Lanza el navegador apuntando al puerto del servidor."""
+    # Espera un margen de seguridad para asegurar que Waitress ya esté escuchando
+    webbrowser.open_new("http://127.0.0.1:8080")
 
 if __name__ == '__main__':
     setup_environment()
@@ -44,14 +26,19 @@ if __name__ == '__main__':
     
     app, engine = create_app()
     
-    # Initialize DB
     with app.app_context():
         Base.metadata.create_all(engine)
         seed_defaults(app.session())
         
     logger.info("*" * 50)
     logger.info("Starting production server (Waitress)")
-    logger.info("URL: http://0.0.0.0:8080")
+    logger.info("URL: http://127.0.0.1:8080")
     logger.info("*" * 50)
+
+    # --- INYECCIÓN DE LANZAMIENTO AUTOMÁTICO ---
+    # Inicia un hilo que espera 1.5 segundos y luego abre el navegador.
+    # Esto corre en paralelo mientras Waitress toma el control del hilo principal.
+    threading.Timer(1.5, open_browser).start()
     
+    # Este comando bloquea la ejecución, por eso el Timer debe ser paralelo
     serve(app, host='0.0.0.0', port=8080, threads=4)

@@ -1,61 +1,58 @@
 <#
 .SYNOPSIS
-    Pipeline de Automatización para compilar el instalador.
+    Script de Compilación de Repositorio.
 .DESCRIPTION
-    Fuerza la compilación a un binario standalone x64 inyectando el icono del repositorio.
+    Compila src/install.ps1 en Installer.exe en la raíz inyectando el icono ico/W_D.ico.
 #>
 
 $ErrorActionPreference = "Stop"
 
-# Rutas estricta del repositorio basado en tu estructura actual
 $RepoRoot     = $PSScriptRoot
 $SourceScript = Join-Path $RepoRoot "src\install.ps1"
 $IconPath     = Join-Path $RepoRoot "ico\W_D.ico"
-$OutputPath   = Join-Path $RepoRoot "Installer.exe" # Se genera directo en la raíz
+$OutputPath   = Join-Path $RepoRoot "Installer.exe"
 
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "   COMPILANDO ARTEFACTO: Installer.exe"
+Write-Host "   PIPELINE DE COMPILACIÓN: GENERANDO BINARIO"
 Write-Host "==================================================" -ForegroundColor Cyan
 
-# Validaciones de Seguridad
+# Validaciones de Integridad de Código
 if (-not (Test-Path $SourceScript)) {
-    Write-Host "❌ Error: Crea primero el script origen en: $SourceScript" -ForegroundColor Red
+    Write-Host "❌ Error: Archivo de origen ausente en $SourceScript" -ForegroundColor Red
     exit 1
 }
 
 if (-not (Test-Path $IconPath)) {
-    Write-Host "❌ Error de Recursos: No se encontró el icono en: $IconPath" -ForegroundColor Red
-    Write-Host "Asegúrate de que el archivo 'W_D.ico' esté dentro de la carpeta 'ico/'" -ForegroundColor Yellow
+    Write-Host "❌ Error: Icono obligatorio no encontrado en $IconPath" -ForegroundColor Red
     exit 1
 }
 
-# Comprobar e instalar el compilador PS2EXE en el entorno local de desarrollo
+# Verificación de la herramienta PS2EXE en la máquina de desarrollo
 if (-not (Get-Module -ListAvailable -Name ps2exe)) {
-    Write-Host "`n[!] Módulo 'ps2exe' no detectado. Instalando..." -ForegroundColor Yellow
+    Write-Host "`n[!] Descargando e instalando compilador ps2exe..." -ForegroundColor Yellow
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Install-Module -Name ps2exe -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck
 }
 
-# Remover binario viejo si existe para evitar conflictos de reemplazo
+# Limpieza preventiva de compilaciones anteriores
 if (Test-Path $OutputPath) {
     Remove-Item $OutputPath -Force
 }
 
-# Parámetros del Compilador
+# Argumentos corregidos: Se elimina el parámetro 'Architecture' obsoleto
 $CompileArgs = @{
     InputFile    = $SourceScript
     OutputFile   = $OutputPath
     IconFile     = $IconPath
-    Title        = "Instalador Prueba Shein-Temu"
-    Description  = "Instalador automatizado para entorno local"
-    Architecture = "x64"
+    Title        = "Instalador Automático Profesional"
+    Description  = "Instalador de producción para Prueba-de-Shein-Temu"
 }
 
 try {
-    Write-Host "`n[+] Ejecutando enlazador de recursos..." -ForegroundColor Blue
+    Write-Host "`n[+] Compilando script e inyectando recursos nativos..." -ForegroundColor Blue
     Invoke-PS2EXE @CompileArgs
-    Write-Host "`n✔ ¡ÉXITO! 'Installer.exe' generado en la raíz del repositorio con el icono W_D.ico" -ForegroundColor Green
+    Write-Host "`n✔ 'Installer.exe' generado exitosamente en la raíz del proyecto." -ForegroundColor Green
 } catch {
-    Write-Host "`n❌ Falló el proceso de compilación: $_" -ForegroundColor Red
+    Write-Host "`n❌ Error en el proceso de enlazado del ejecutable: $_" -ForegroundColor Red
     exit 1
 }

