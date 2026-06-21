@@ -76,6 +76,11 @@ Pre-Visualizacion de como quedarian los archivos en el explorador de archivo o e
 
 ```
 
+File Tree: Prueba-de-Shein-Temu-main
+Generated on: 6/21/2026, 5:53:42 PM
+Root path: c:\Users\hecto\Downloads\Prueba-de-Shein-Temu-main\Prueba-de-Shein-Temu-main
+
+────────────────────────────────────────────────────────────────────────────────
 ├── 📁 app/
 │   ├── 📁 routes/
 │   │   ├── 🐍 __init__.py
@@ -126,10 +131,15 @@ Pre-Visualizacion de como quedarian los archivos en el explorador de archivo o e
 │   ├── 📄 catalog.db
 │   ├── 📄 catalog.db-shm
 │   └── 📄 catalog.db-wal
+├── 📁 ico/
+│   └── 📄 W_D.ico
 ├── 📁 logs/
-├── 📄 1) Install Dependencies.bat
-├── 📄 2) Start Software.bat
+├── 📁 src/
+│   └── 📄 install.ps1
+├── ⚙️ Installer.exe
 ├── 📝 README.md
+├── 📄 build.ps1
 ├── 📄 requirements.txt
-└── 🐍 run.py
+├── 🐍 run.py
+└───────────────────────────────────────────────────────────────────────────────
 ```
