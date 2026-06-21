@@ -1,58 +1,61 @@
-# White-Label E-Commerce Engine (Air-Gapped)
+# 🛒 E-Commerce Air-Gapped Engine
+*"El sistema de ventas para gente que no confía en el internet (o que simplemente no tiene)."*
 
-Sistema de comercio electrónico y gestión de catálogo diseñado para operar en entornos 100% offline (Air-Gapped) sobre redes locales (LAN) o localhost. Construido con arquitectura Flask, SQLite WAL y Vanilla JavaScript sin dependencias externas o CDNs.
+<img src="https://media.tenor.com/7-8nL_Sj35sAAAAM/cat-typing.gif" width="200" />
 
-## Arquitectura del Sistema
+</div>
 
-* **Backend:** Python 3.10+, Flask, SQLAlchemy 2.0
-* **Base de Datos:** SQLite3 con modo WAL (Write-Ahead Logging) habilitado para alta concurrencia en redes locales sin bloqueos.
-* **Frontend:** Vanilla JS (ES6+), HTML5 Semántico, CSS Variables.
-* **Servidor de Producción:** Waitress (WSGI server).
+---
 
-## Características de Nivel Empresarial
+## ◈ ¿Qué es este artefacto? ◈
 
-1. **Totalmente Offline (Zero CDN):** Todos los recursos, incluyendo tipografías web (Inter), íconos (SVG sprites) y librerías, se sirven estáticamente desde el backend. Nada fallará si el servidor no tiene conexión a internet.
-2. **Modo WAL SQLite Activo:** Resuelve el clásico problema de "database is locked" de SQLite. Permite que múltiples usuarios naveguen el catálogo y carguen imágenes concurrentemente sin bloquear la base de datos.
-3. **Manejo Seguro de Archivos:** Las imágenes no se guardan con sus nombres originales. Se utiliza UUID4 para evitar ataques de _path traversal_ y colisión de nombres. Además, se validan mediante inspección de _magic bytes_ (MIME), no solo confiando en la extensión del archivo.
-4. **Diseño Adaptativo White-Label:**
-   * Motor dinámico de configuración: Todo el color principal, acento, nombre de la tienda, moneda se pueden cambiar dinámicamente desde el panel Admin y son inyectados mediante SSR en las variables CSS.
-   * Soporte automático nativo de `prefers-color-scheme: dark`. El sistema cambia su paleta a una versión oscura o clara automáticamente en base al OS del cliente.
-5. **Arquitectura Limpia:** Separación en capas (Views -> Services -> Data Layer). No hay lógica de negocio en los endpoints.
+Es un motor de e-commerce diseñado para entornos **100% offline (Air-Gapped)**. Si tienes una red local donde no llega ni el Wi-Fi de tu vecino, este sistema te permite gestionar catálogos como si fueras un gigante tecnológico, pero sin depender de la nube de nadie.
 
-## Cómo Iniciar
+Construido sobre **Python 3.10+, Flask y SQLAlchemy 2.0**, este proyecto nació del odio hacia las dependencias externas y la obsesión por la arquitectura limpia. **Sin CDNs, sin trackers, sin basura.**
 
-### 1. Entorno de Ejecución
+---
 
-Asegúrate de contar con Python 3.10+ instalado en la máquina anfitriona. 
+## ◈ Características de Nivel "Ingeniero con Café" ◈
 
-```bash
-# Navega a la raíz del proyecto
-cd c:\wamp64\www\UNELLEZ\
-# Instala las dependencias en modo offline (o a través de pip regular si estás preparando el servidor)
-pip install -r requirements.txt
-```
-### 2. Arranque del Servidor de Producción
-Ejecuta el bootstrapper. Este se encargará de crear toda la estructura de directorios necesaria (`db/`, `static/uploads/`, `logs/`), inicializar las tablas de base de datos e invocar al servidor de producción.
-```bash
-python run.py
-```
-El servidor quedará a la escucha en **http://0.0.0.0:8080**. Puedes acceder desde cualquier dispositivo en la misma red local a través de la IP de la máquina anfitriona (ej. `http://192.168.1.10:8080`).
+*   **Totalmente Offline (Zero CDN):** Tipografías, íconos y librerías se sirven localmente. Nada va a fallar si te cortan el cable submarino.
+*   **Modo SQLite WAL:** Adiós al error "database is locked". Permite concurrencia real en redes locales sin bloqueos estúpidos.
+*   **Seguridad de Hierro:** 
+    *   **SQL Injection:** Mitigado por diseño mediante ORM con sentencias parametrizadas.
+    *   **Uploads:** Validación de *magic bytes* (MIME). No aceptamos nada que no sea lo que dice ser.
+    *   **Anti-Patrañas:** UUID4 para nombres de archivos (evita *path traversal* y colisiones).
+*   **Diseño White-Label:** ¿Quieres que sea elegante? ¿O que parezca un terminal de los 80? Cambia colores y moneda desde el Admin y el CSS se inyecta dinámicamente.
+*   **Soporte Nativo OS:** Cambia a modo oscuro/claro automáticamente según tu SO.
 
-## Panel de Administración
+---
 
-Para acceder al gestor del catálogo, visita:
-**`http://<tu-ip>:8080/admin`**
-Allí encontrarás:
-- Dashboard de estadísticas.
-- Gestión CRUD de Productos y Categorías.
-- Configuración del Sistema (paletas de color, moneda, identidad).
-- Constructor de Filtros Dinámicos para el catálogo.
+## ◈ Instalación ◈
 
-## Control de Seguridad (Air-Gapped Context)
+Si quieres dejar de sufrir, simplemente abre tu terminal y ejecuta:
 
-- **SQL Injection:** Totalmente mitigado. SQLAlchemy 2.0 ORM con sentencias parametrizadas (nunca _raw strings_).
-- **Subida de Ficheros (Uploads):** Validada por *headers* binarios (ver `app/services/uploads.py`).
-- **XSS & CORS:** Cabeceras de seguridad CSP (Content-Security-Policy), X-Frame-Options y X-XSS-Protection inyectadas globalmente mediante _middlewares_ de Flask en `__init__.py`.
+```powershell
+iwr -useb [https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/install.ps1](https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/install.ps1) | iex```
 
+Este script se encarga de todo: descargar el repo, preparar el entorno, instalar dependencias y dejarte un icono en el escritorio.
+◈ Preguntas Frecuentes (FAQ) ◈
+P: ¿Por qué SQLite y no algo más "pro" como PostgreSQL?
+R: Porque es un sistema offline. SQLite con modo WAL es más que suficiente para una red local y no requiere configurar un servidor de base de datos que termine fallando cuando no hay internet.
 
-                                                      
+P: ¿Puedo cambiar los colores de la tienda?
+R: Absolutamente. Todo es dinámico. Ve al panel /admin y ajusta las variables CSS desde la configuración. Tu tienda, tus reglas.
+
+P: ¿Qué pasa si intento hackear mi propia tienda?
+R: Recibirás un error 403 o serás redirigido, porque hay CSP (Content-Security-Policy) inyectada globalmente. No lo intentes, funciona.
+
+P: ¿Se puede acceder desde otros celulares en la misma red?
+R: Sí. Solo usa la IP de la máquina anfitriona (ej. http://192.168.1.50:8080).
+
+P: El servidor no arranca, ¿qué hago?
+R: Verifica que tengas instalado Python 3.10+ y que las variables de entorno estén bien configuradas. Si el error persiste, revisa los logs en la carpeta /logs.
+
+◈ Arquitectura Limpia ◈
+No mezclamos peras con manzanas:
+Views: Solo muestran lo que el usuario pide.
+
+Services: Aquí vive la lógica de negocio (nada de lógica en los endpoints).
+
+Data Layer: Interacción pura con la base de datos vía ORM.
