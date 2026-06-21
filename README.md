@@ -15,7 +15,7 @@ Construido sobre **Python 3.10+, Flask y SQLAlchemy 2.0**, este proyecto nació 
 
 ---
 
-## ◈ Características de Nivel "Ingeniero con Café" ◈
+## ◈ Características Importantes a resaltar ◈
 
 *   **Totalmente Offline (Zero CDN):** Tipografías, íconos y librerías se sirven localmente. Nada va a fallar si te cortan el cable submarino.
 *   **Modo SQLite WAL:** Adiós al error "database is locked". Permite concurrencia real en redes locales sin bloqueos estúpidos.
