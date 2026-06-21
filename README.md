@@ -37,8 +37,10 @@ iwr -useb [https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/i
 ```
 
 Este script se encarga de todo: descargar el repo, preparar el entorno, instalar dependencias y dejarte un icono en el escritorio.
+
+
 ◈ Preguntas Frecuentes (FAQ) ◈
-P: ¿Por qué SQLite y no algo más "pro" como PostgreSQL?
+P: ¿Por qué SQLite y no algo más "profesional" como PostgreSQL?
 R: Porque es un sistema offline. SQLite con modo WAL es más que suficiente para una red local y no requiere configurar un servidor de base de datos que termine fallando cuando no hay internet.
 
 P: ¿Puedo cambiar los colores de la tienda?
