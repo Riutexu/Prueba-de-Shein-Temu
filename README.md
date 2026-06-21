@@ -38,6 +38,7 @@ iwr -useb [https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/i
 
 Este script se encarga de todo: descargar el repo, preparar el entorno, instalar dependencias y dejarte un icono en el escritorio.
 
+---
 
 ## ◈ Preguntas Frecuentes (FAQ) ◈
 P: ¿Por qué SQLite y no algo más "profesional" como PostgreSQL?
