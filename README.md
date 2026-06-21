@@ -58,7 +58,7 @@ R: Verifica que tengas instalado Python 3.10+ y que las variables de entorno est
 
 ---
 
-## ◈ Arquitectura Limpia ◈
+## ◈ Arquitectura Contextual ◈
 
 No mezclamos peras con manzanas:
 
@@ -67,3 +67,69 @@ Views: Solo muestran lo que el usuario pide.
 Services: Aquí vive la lógica de negocio (nada de lógica en los endpoints).
 
 Data Layer: Interacción pura con la base de datos vía ORM.
+
+---
+
+## ◈ Arquitectura de Archivos ◈
+
+Pre-Visualizacion de como quedarian los archivos en el explorador de archivo o editor de codigo.
+
+```
+
+├── 📁 app/
+│   ├── 📁 routes/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 api.py
+│   │   └── 🐍 views.py
+│   ├── 📁 services/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 catalog.py
+│   │   ├── 🐍 config_service.py
+│   │   ├── 🐍 filters.py
+│   │   └── 🐍 uploads.py
+│   ├── 📁 static/
+│   │   ├── 📁 css/
+│   │   │   ├── 🎨 admin.css
+│   │   │   ├── 🎨 base.css
+│   │   │   ├── 🎨 components.css
+│   │   │   ├── 🎨 layout.css
+│   │   │   └── 🎨 variables.css
+│   │   ├── 📁 fonts/
+│   │   ├── 📁 icons/
+│   │   │   └── 🖼️ sprites.svg
+│   │   ├── 📁 js/
+│   │   │   ├── 📄 admin.js
+│   │   │   ├── 📄 api.js
+│   │   │   ├── 📄 app.js
+│   │   │   ├── 📄 catalog.js
+│   │   │   └── 📄 utils.js
+│   │   └── 📁 uploads/
+│   ├── 📁 templates/
+│   │   ├── 📁 admin/
+│   │   │   ├── 🌐 categories.html
+│   │   │   ├── 🌐 dashboard.html
+│   │   │   ├── 🌐 filters.html
+│   │   │   ├── 🌐 products.html
+│   │   │   └── 🌐 settings.html
+│   │   ├── 📁 components/
+│   │   │   ├── 🌐 admin_sidebar.html
+│   │   │   ├── 🌐 navbar.html
+│   │   │   ├── 🌐 pagination.html
+│   │   │   └── 🌐 product_card.html
+│   │   ├── 🌐 base.html
+│   │   ├── 🌐 index.html
+│   │   └── 🌐 product.html
+│   ├── 🐍 __init__.py
+│   ├── 🐍 config.py
+│   └── 🐍 models.py
+├── 📁 db/
+│   ├── 📄 catalog.db
+│   ├── 📄 catalog.db-shm
+│   └── 📄 catalog.db-wal
+├── 📁 logs/
+├── 📄 1) Install Dependencies.bat
+├── 📄 2) Start Software.bat
+├── 📝 README.md
+├── 📄 requirements.txt
+└── 🐍 run.py
+```
