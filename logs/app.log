@@ -1,0 +1,61 @@
+2026-06-18 18:43:13,714 - bootstrapper - INFO - Initializing application...
+2026-06-18 18:43:13,977 - bootstrapper - INFO - **************************************************
+2026-06-18 18:43:13,977 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-18 18:43:13,978 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-18 18:43:13,978 - bootstrapper - INFO - **************************************************
+2026-06-18 18:43:13,984 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-18 18:47:24,095 - bootstrapper - INFO - Initializing application...
+2026-06-18 18:47:24,167 - bootstrapper - INFO - **************************************************
+2026-06-18 18:47:24,167 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-18 18:47:24,168 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-18 18:47:24,168 - bootstrapper - INFO - **************************************************
+2026-06-18 18:47:24,174 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-18 18:48:54,888 - bootstrapper - INFO - Initializing application...
+2026-06-18 18:48:54,934 - bootstrapper - INFO - **************************************************
+2026-06-18 18:48:54,934 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-18 18:48:54,936 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-18 18:48:54,936 - bootstrapper - INFO - **************************************************
+2026-06-18 18:48:54,941 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-18 18:49:09,739 - bootstrapper - INFO - Initializing application...
+2026-06-18 18:49:09,794 - bootstrapper - INFO - **************************************************
+2026-06-18 18:49:09,794 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-18 18:49:09,794 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-18 18:49:09,795 - bootstrapper - INFO - **************************************************
+2026-06-18 18:49:09,800 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-18 18:49:31,075 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-18 18:49:31,088 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:27:45,800 - bootstrapper - INFO - Initializing application...
+2026-06-21 12:27:46,064 - bootstrapper - INFO - **************************************************
+2026-06-21 12:27:46,064 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-21 12:27:46,064 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-21 12:27:46,068 - bootstrapper - INFO - **************************************************
+2026-06-21 12:27:46,081 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-21 12:27:54,873 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:27:55,043 - waitress.queue - WARNING - Task queue depth is 2
+2026-06-21 12:27:55,915 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:27:56,176 - waitress.queue - WARNING - Task queue depth is 2
+2026-06-21 12:27:56,510 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:36:55,620 - bootstrapper - INFO - Initializing application...
+2026-06-21 12:36:55,787 - bootstrapper - INFO - **************************************************
+2026-06-21 12:36:55,790 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-21 12:36:55,790 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-21 12:36:55,790 - bootstrapper - INFO - **************************************************
+2026-06-21 12:36:55,812 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-21 12:37:03,284 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:37:03,653 - waitress.queue - WARNING - Task queue depth is 2
+2026-06-21 12:37:04,080 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:41:30,346 - bootstrapper - INFO - Initializing application...
+2026-06-21 12:41:30,494 - bootstrapper - INFO - **************************************************
+2026-06-21 12:41:30,494 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-21 12:41:30,494 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-21 12:41:30,495 - bootstrapper - INFO - **************************************************
+2026-06-21 12:41:30,505 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-21 12:41:40,568 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:43:50,201 - bootstrapper - INFO - Initializing application...
+2026-06-21 12:43:50,329 - bootstrapper - INFO - **************************************************
+2026-06-21 12:43:50,332 - bootstrapper - INFO - Starting production server (Waitress)
+2026-06-21 12:43:50,332 - bootstrapper - INFO - URL: http://0.0.0.0:8080
+2026-06-21 12:43:50,332 - bootstrapper - INFO - **************************************************
+2026-06-21 12:43:50,344 - waitress - INFO - Serving on http://0.0.0.0:8080
+2026-06-21 12:43:57,938 - waitress.queue - WARNING - Task queue depth is 1
+2026-06-21 12:43:57,942 - waitress.queue - WARNING - Task queue depth is 2

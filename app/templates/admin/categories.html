@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block layout %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">{{ config.site_name }}</div>
+        <nav class="admin-sidebar__nav">
+            <a href="{{ url_for('views.admin_dashboard') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-bar-chart"></use></svg> Dashboard</a>
+            <a href="{{ url_for('views.admin_products') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg> Productos</a>
+            <a href="{{ url_for('views.admin_categories') }}" class="admin-sidebar__link admin-sidebar__link--active"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg> Categorías</a>
+            <a href="{{ url_for('views.admin_filters') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg> Filtros</a>
+            <a href="{{ url_for('views.admin_settings') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg> Configuración</a>
+            <a href="{{ url_for('views.index') }}" class="admin-sidebar__link" style="margin-top: auto;"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg> Ver Tienda</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h2>Categorías</h2>
+        </div>
+
+        <div class="action-bar">
+            <div></div>
+            <button class="btn btn--primary" onclick="openCategoryModal()">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-plus"></use></svg> Nueva Categoría
+            </button>
+        </div>
+
+        <div class="card" style="padding: var(--space-4);">
+            <ul class="category-tree" style="padding: 0; border: none;">
+                {% for c in categories %}
+                <li class="category-tree__item">
+                    <div class="flex--between" style="padding: var(--space-2); background: var(--color-surface-hover); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                        <span style="font-weight: var(--font-weight-medium);">{{ c.name }}</span>
+                        <div class="flex gap-2">
+                            <button class="btn btn--icon btn--ghost btn--sm" onclick='openCategoryModal({{ {"id": c.id, "name": c.name, "parent_id": c.parent_id, "description": c.description, "position": c.position}|tojson }})'><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-edit"></use></svg></button>
+                            <button class="btn btn--icon btn--ghost btn--sm" style="color: var(--color-danger);" onclick="deleteCategory({{ c.id }})"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-trash"></use></svg></button>
+                        </div>
+                    </div>
+                    {% if c.children %}
+                    <ul class="category-tree__children category-tree" style="margin-top: var(--space-2);">
+                        {% for child in c.children %}
+                        <li class="category-tree__item flex--between" style="padding: var(--space-2); margin-left: var(--space-4); background: var(--color-bg); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                            <span>{{ child.name }}</span>
+                            <div class="flex gap-2">
+                                <button class="btn btn--icon btn--ghost btn--sm" onclick='openCategoryModal({{ {"id": child.id, "name": child.name, "parent_id": child.parent_id, "description": child.description, "position": child.position}|tojson }})'><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-edit"></use></svg></button>
+                                <button class="btn btn--icon btn--ghost btn--sm" style="color: var(--color-danger);" onclick="deleteCategory({{ child.id }})"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-trash"></use></svg></button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+                {% endfor %}
+                {% if not categories %}
+                <li style="color: var(--color-text-muted); text-align: center; padding: var(--space-4);">No hay categorías creadas.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </main>
+</div>
+
+<template id="category-modal-tpl">
+    <div class="modal__header">
+        <h3 id="modal-title">Nueva Categoría</h3>
+        <button class="btn btn--icon btn--ghost" onclick="hideModal()"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-x"></use></svg></button>
+    </div>
+    <form id="category-form" onsubmit="saveCategory(event)">
+        <div class="modal__body">
+            <input type="hidden" name="id" id="c-id">
+            
+            <div class="form-group">
+                <label class="form-label">Nombre *</label>
+                <input type="text" name="name" id="c-name" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Categoría Padre</label>
+                <select name="parent_id" id="c-parent" class="form-select">
+                    <option value="">Ninguna</option>
+                    {% for fc in flat_categories %}
+                    <option value="{{ fc.id }}">{{ fc.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Posición</label>
+                <input type="number" name="position" id="c-position" class="form-input" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Descripción</label>
+                <textarea name="description" id="c-description" class="form-textarea" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick="hideModal()">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+    </form>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openCategoryModal(data = null) {
+    showModal($('#category-modal-tpl').innerHTML);
+    if(data) {
+        $('#modal-title').textContent = 'Editar Categoría';
+        $('#c-id').value = data.id;
+        $('#c-name').value = data.name;
+        $('#c-parent').value = data.parent_id || '';
+        $('#c-position').value = data.position || 0;
+        $('#c-description').value = data.description || '';
+    }
+}
+
+async function saveCategory(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    const id = data.id;
+    delete data.id;
+    
+    try {
+        if(id) {
+            await apiPut(`/categories/${id}`, data);
+        } else {
+            await apiPost('/categories', data);
+        }
+        showToast('Categoría guardada');
+        window.location.reload();
+    } catch(err) {}
+}
+
+window.deleteCategory = async (id) => {
+    const confirm = await confirmAction('¿Eliminar categoría? Los productos e subcategorías se verán afectados.');
+    if (confirm) {
+        try {
+            await apiDelete(`/categories/${id}`);
+            showToast('Categoría eliminada');
+            window.location.reload();
+        } catch (e) { }
+    }
+};
+</script>
+{% endblock %}

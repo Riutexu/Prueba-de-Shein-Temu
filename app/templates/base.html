@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ config.site_name }} - Catálogo de Productos">
+    <title>{% block title %}{{ config.site_name }}{% endblock %}</title>
+    
+    <!-- SSR CSS Variable Overrides from AppConfig -->
+    <style>
+        :root {
+            --color-primary: {{ config.primary_color }};
+            --color-secondary: {{ config.secondary_color }};
+            --color-accent: {{ config.accent_color }};
+            --color-bg: {{ config.bg_color }};
+            --color-text: {{ config.text_color }};
+        }
+    </style>
+    
+    <!-- Local CSS only -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block layout %}
+        {% include 'components/navbar.html' %}
+        <main id="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    {% endblock %}
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+    
+    <!-- Local JS only -->
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

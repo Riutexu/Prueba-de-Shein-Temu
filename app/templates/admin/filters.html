@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block layout %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">{{ config.site_name }}</div>
+        <nav class="admin-sidebar__nav">
+            <a href="{{ url_for('views.admin_dashboard') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-bar-chart"></use></svg> Dashboard</a>
+            <a href="{{ url_for('views.admin_products') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg> Productos</a>
+            <a href="{{ url_for('views.admin_categories') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg> Categorías</a>
+            <a href="{{ url_for('views.admin_filters') }}" class="admin-sidebar__link admin-sidebar__link--active"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg> Filtros</a>
+            <a href="{{ url_for('views.admin_settings') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg> Configuración</a>
+            <a href="{{ url_for('views.index') }}" class="admin-sidebar__link" style="margin-top: auto;"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg> Ver Tienda</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h2>Filtros Dinámicos</h2>
+        </div>
+
+        <div class="action-bar">
+            <div></div>
+            <button class="btn btn--primary" onclick="openFilterModal()">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-plus"></use></svg> Nuevo Filtro
+            </button>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Campo (DB)</th>
+                    <th>Dirección</th>
+                    <th>Posición</th>
+                    <th>Visible</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in filters %}
+                <tr>
+                    <td style="font-weight: var(--font-weight-medium);">{{ f.name }}</td>
+                    <td><code style="background: var(--color-surface-hover); padding: 2px 6px; border-radius: 4px;">{{ f.field }}</code></td>
+                    <td>
+                        <span class="badge {% if f.direction == 'ASC' %}badge--success{% else %}badge--warning{% endif %}">{{ f.direction }}</span>
+                    </td>
+                    <td>{{ f.position }}</td>
+                    <td>
+                        {% if f.is_visible %}<span class="badge badge--primary">Sí</span>{% else %}<span class="badge" style="background: var(--color-border);">No</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <button class="btn btn--icon btn--ghost" onclick='openFilterModal({{ {"id": f.id, "name": f.name, "field": f.field, "direction": f.direction, "position": f.position, "is_visible": f.is_visible}|tojson }})'><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-edit"></use></svg></button>
+                            <button class="btn btn--icon btn--ghost" style="color: var(--color-danger);" onclick="deleteFilter({{ f.id }})"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-trash"></use></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not filters %}
+                <tr><td colspan="6" style="text-align: center; color: var(--color-text-muted);">No hay filtros configurados.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </main>
+</div>
+
+<template id="filter-modal-tpl">
+    <div class="modal__header">
+        <h3 id="modal-title">Nuevo Filtro</h3>
+        <button class="btn btn--icon btn--ghost" onclick="hideModal()"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-x"></use></svg></button>
+    </div>
+    <form id="filter-form" onsubmit="saveFilter(event)">
+        <div class="modal__body grid grid--2">
+            <input type="hidden" name="id" id="f-id">
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre Mostrar *</label>
+                <input type="text" name="name" id="f-name" class="form-input" placeholder="Ej: Precio de menor a mayor" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Campo SQL *</label>
+                <select name="field" id="f-field" class="form-select" required>
+                    <option value="name">Nombre (name)</option>
+                    <option value="price">Precio (price)</option>
+                    <option value="stock">Stock (stock)</option>
+                    <option value="created_at">Fecha Creación (created_at)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Dirección *</label>
+                <select name="direction" id="f-direction" class="form-select" required>
+                    <option value="ASC">Ascendente (A-Z / 0-9)</option>
+                    <option value="DESC">Descendente (Z-A / 9-0)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Posición</label>
+                <input type="number" name="position" id="f-position" class="form-input" value="0">
+            </div>
+            
+            <div class="form-group flex--center" style="justify-content: flex-start; gap: var(--space-2);">
+                <input type="checkbox" name="is_visible" id="f-visible" value="true" checked style="width: 18px; height: 18px;">
+                <label class="form-label" for="f-visible" style="margin: 0;">Activo (Visible en tienda)</label>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick="hideModal()">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+    </form>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openFilterModal(data = null) {
+    showModal($('#filter-modal-tpl').innerHTML);
+    if(data) {
+        $('#modal-title').textContent = 'Editar Filtro';
+        $('#f-id').value = data.id;
+        $('#f-name').value = data.name;
+        $('#f-field').value = data.field;
+        $('#f-direction').value = data.direction;
+        $('#f-position').value = data.position;
+        $('#f-visible').checked = data.is_visible;
+    }
+}
+
+async function saveFilter(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    const id = data.id;
+    delete data.id;
+    
+    data.is_visible = !!formData.get('is_visible');
+    data.position = parseInt(data.position) || 0;
+    
+    try {
+        if(id) {
+            await apiPut(`/filters/${id}`, data);
+        } else {
+            await apiPost('/filters', data);
+        }
+        showToast('Filtro guardado');
+        window.location.reload();
+    } catch(err) {}
+}
+
+window.deleteFilter = async (id) => {
+    const confirm = await confirmAction('¿Eliminar filtro?');
+    if (confirm) {
+        try {
+            await apiDelete(`/filters/${id}`);
+            showToast('Filtro eliminado');
+            window.location.reload();
+        } catch (e) { }
+    }
+};
+</script>
+{% endblock %}

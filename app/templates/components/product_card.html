@@ -1,0 +1,29 @@
+<article class="card">
+    {% if product.image_path %}
+    <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" alt="{{ product.name }}" class="card__image">
+    {% else %}
+    <div class="card__image flex--center" style="background: var(--color-surface-hover); color: var(--color-text-muted);">
+        <svg class="icon" style="width: 48px; height: 48px;"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-image"></use></svg>
+    </div>
+    {% endif %}
+    
+    <div class="card__body">
+        {% if product.category %}
+            <span class="badge badge--primary" style="margin-bottom: var(--space-2); align-self: flex-start;">{{ product.category.name }}</span>
+        {% endif %}
+        
+        <h3 class="card__title">
+            <a href="{{ url_for('views.product_detail', slug=product.slug) }}" style="color: inherit;">{{ product.name }}</a>
+        </h3>
+        
+        <div class="card__price">{{ config.currency_symbol }}{{ product.price }} {{ config.currency_code }}</div>
+        
+        <div class="card__meta flex--between">
+            {% if product.stock > 0 %}
+                <span class="badge badge--success">En Stock ({{ product.stock }})</span>
+            {% else %}
+                <span class="badge badge--danger">Agotado</span>
+            {% endif %}
+        </div>
+    </div>
+</article>

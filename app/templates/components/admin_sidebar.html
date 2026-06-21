@@ -1,0 +1,56 @@
+{# Reusable Admin Sidebar Component
+   Expects: active_page (string) set before including this component.
+   Available pages: 'dashboard', 'products', 'categories', 'filters', 'settings'
+#}
+<aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar__logo" id="admin-sidebar-logo">
+        <a href="{{ url_for('admin.dashboard') }}">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg>
+            <span>{{ config.site_name }}</span>
+        </a>
+    </div>
+
+    <nav class="admin-sidebar__nav" id="admin-sidebar-nav" aria-label="Navegación administrativa">
+        <a href="{{ url_for('admin.dashboard') }}"
+           class="admin-sidebar__link{% if active_page == 'dashboard' %} admin-sidebar__link--active{% endif %}"
+           id="admin-nav-dashboard">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-home"></use></svg>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('admin.products') }}"
+           class="admin-sidebar__link{% if active_page == 'products' %} admin-sidebar__link--active{% endif %}"
+           id="admin-nav-products">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg>
+            <span>Productos</span>
+        </a>
+
+        <a href="{{ url_for('admin.categories') }}"
+           class="admin-sidebar__link{% if active_page == 'categories' %} admin-sidebar__link--active{% endif %}"
+           id="admin-nav-categories">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg>
+            <span>Categorías</span>
+        </a>
+
+        <a href="{{ url_for('admin.filters') }}"
+           class="admin-sidebar__link{% if active_page == 'filters' %} admin-sidebar__link--active{% endif %}"
+           id="admin-nav-filters">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg>
+            <span>Filtros</span>
+        </a>
+
+        <a href="{{ url_for('admin.settings') }}"
+           class="admin-sidebar__link{% if active_page == 'settings' %} admin-sidebar__link--active{% endif %}"
+           id="admin-nav-settings">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg>
+            <span>Configuración</span>
+        </a>
+    </nav>
+
+    <div class="admin-sidebar__footer">
+        <a href="{{ url_for('main.index') }}" class="admin-sidebar__link" id="admin-nav-storefront">
+            <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg>
+            <span>Ver Tienda</span>
+        </a>
+    </div>
+</aside>

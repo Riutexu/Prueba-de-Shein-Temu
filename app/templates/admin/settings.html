@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block layout %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">{{ config.site_name }}</div>
+        <nav class="admin-sidebar__nav">
+            <a href="{{ url_for('views.admin_dashboard') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-bar-chart"></use></svg> Dashboard</a>
+            <a href="{{ url_for('views.admin_products') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg> Productos</a>
+            <a href="{{ url_for('views.admin_categories') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg> Categorías</a>
+            <a href="{{ url_for('views.admin_filters') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg> Filtros</a>
+            <a href="{{ url_for('views.admin_settings') }}" class="admin-sidebar__link admin-sidebar__link--active"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg> Configuración</a>
+            <a href="{{ url_for('views.index') }}" class="admin-sidebar__link" style="margin-top: auto;"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg> Ver Tienda</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h2>Configuración del Sistema</h2>
+        </div>
+
+        <form onsubmit="saveSettings(this)" class="card form-panel" style="padding: var(--space-6);">
+            
+            <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Identidad</h3>
+            <div class="settings-grid grid grid--2">
+                <div class="form-group">
+                    <label class="form-label">Nombre del Sitio</label>
+                    <input type="text" name="site_name" class="form-input" value="{{ config.site_name }}">
+                </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Moneda</h3>
+            <div class="settings-grid grid grid--2">
+                <div class="form-group">
+                    <label class="form-label">Símbolo</label>
+                    <input type="text" name="currency_symbol" class="form-input" value="{{ config.currency_symbol }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Código ISO</label>
+                    <input type="text" name="currency_code" class="form-input" value="{{ config.currency_code }}">
+                </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Paleta de Colores</h3>
+            <div class="settings-grid grid grid--3">
+                <div class="form-group color-input">
+                    <label class="form-label">Color Primario</label>
+                    <div class="flex gap-2">
+                        <input type="color" name="primary_color" value="{{ config.primary_color }}" style="height: 38px; width: 38px; padding: 0; border: none;">
+                        <input type="text" class="form-input" value="{{ config.primary_color }}" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group color-input">
+                    <label class="form-label">Color Secundario</label>
+                    <div class="flex gap-2">
+                        <input type="color" name="secondary_color" value="{{ config.secondary_color }}" style="height: 38px; width: 38px; padding: 0; border: none;">
+                        <input type="text" class="form-input" value="{{ config.secondary_color }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group color-input">
+                    <label class="form-label">Acento</label>
+                    <div class="flex gap-2">
+                        <input type="color" name="accent_color" value="{{ config.accent_color }}" style="height: 38px; width: 38px; padding: 0; border: none;">
+                        <input type="text" class="form-input" value="{{ config.accent_color }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group color-input">
+                    <label class="form-label">Fondo Principal</label>
+                    <div class="flex gap-2">
+                        <input type="color" name="bg_color" value="{{ config.bg_color }}" style="height: 38px; width: 38px; padding: 0; border: none;">
+                        <input type="text" class="form-input" value="{{ config.bg_color }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group color-input">
+                    <label class="form-label">Color de Texto</label>
+                    <div class="flex gap-2">
+                        <input type="color" name="text_color" value="{{ config.text_color }}" style="height: 38px; width: 38px; padding: 0; border: none;">
+                        <input type="text" class="form-input" value="{{ config.text_color }}" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: var(--space-8); display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn--primary btn--lg">Guardar Cambios</button>
+            </div>
+        </form>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

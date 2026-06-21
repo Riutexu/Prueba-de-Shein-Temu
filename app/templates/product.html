@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+    
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" style="margin-bottom: var(--space-6); display: flex; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm);">
+        <a href="{{ url_for('views.index') }}" style="color: inherit;">Inicio</a>
+        <span>/</span>
+        {% if product.category %}
+        <a href="{{ url_for('views.index', category_id=product.category.id) }}" style="color: inherit;">{{ product.category.name }}</a>
+        <span>/</span>
+        {% endif %}
+        <span style="color: var(--color-text);">{{ product.name }}</span>
+    </nav>
+
+    <!-- Product Detail -->
+    <div class="product-detail grid grid--2" style="gap: var(--space-10); margin-bottom: var(--space-16);">
+        <!-- Image Gallery -->
+        <div class="product-detail__gallery">
+            <div class="card" style="padding: var(--space-2); border-radius: var(--radius-xl);">
+                {% if product.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" alt="{{ product.name }}" style="width: 100%; border-radius: var(--radius-lg); aspect-ratio: 1; object-fit: contain; background: var(--color-bg);">
+                {% else %}
+                <div class="flex--center" style="width: 100%; aspect-ratio: 1; background: var(--color-surface-hover); color: var(--color-text-muted); border-radius: var(--radius-lg);">
+                    <svg class="icon" style="width: 96px; height: 96px;"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-image"></use></svg>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="product-detail__info flex--column" style="display: flex; flex-direction: column; justify-content: center;">
+            <h1 style="font-size: var(--font-size-3xl); margin-bottom: var(--space-2);">{{ product.name }}</h1>
+            
+            <div class="flex--center" style="justify-content: flex-start; gap: var(--space-4); margin-bottom: var(--space-6);">
+                <div class="product-detail__price" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+                    {{ config.currency_symbol }}{{ product.price }} <span style="font-size: var(--font-size-base); color: var(--color-text-muted);">{{ config.currency_code }}</span>
+                </div>
+                
+                {% if product.stock > 0 %}
+                    <span class="badge badge--success" style="font-size: var(--font-size-sm); padding: var(--space-1) var(--space-3);">En Stock ({{ product.stock }})</span>
+                {% else %}
+                    <span class="badge badge--danger" style="font-size: var(--font-size-sm); padding: var(--space-1) var(--space-3);">Agotado</span>
+                {% endif %}
+            </div>
+            
+            {% if product.sku %}
+            <div style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-6);">
+                <strong>SKU:</strong> {{ product.sku }}
+            </div>
+            {% endif %}
+
+            <div style="line-height: var(--line-height-relaxed); color: var(--color-text); margin-bottom: var(--space-8); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                {{ product.description or "Sin descripción." }}
+            </div>
+
+            <button class="btn btn--primary btn--lg" {% if product.stock == 0 %}disabled{% endif %} style="width: 100%; max-width: 300px;">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-cart"></use></svg>
+                Añadir al Carrito
+            </button>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="section" style="border-top: 1px solid var(--color-border);">
+        <h2 style="text-align: center; margin-bottom: var(--space-8);">Productos Relacionados</h2>
+        <div class="grid grid--4">
+            {% for rel_product in related_products %}
+                {% with product=rel_product %}
+                    {% include 'components/product_card.html' %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<header class="page-header" style="margin-bottom: 0; background: var(--color-surface); padding: var(--space-4) 0; box-shadow: var(--shadow-sm);">
+    <div class="container flex--between">
+        <a href="{{ url_for('views.index') }}" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+            {{ config.site_name }}
+        </a>
+        
+        <nav class="flex--gap">
+            <a href="{{ url_for('views.index') }}" class="btn btn--ghost">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-home"></use></svg>
+                Catálogo
+            </a>
+            <a href="{{ url_for('views.admin_dashboard') }}" class="btn btn--ghost">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg>
+                Admin
+            </a>
+        </nav>
+    </div>
+</header>

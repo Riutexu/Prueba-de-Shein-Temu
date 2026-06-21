@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block layout %}
+<div class="admin-layout">
+    <!-- Sidebar macro or copy (simplification for single file) -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">{{ config.site_name }}</div>
+        <nav class="admin-sidebar__nav">
+            <a href="{{ url_for('views.admin_dashboard') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-bar-chart"></use></svg> Dashboard</a>
+            <a href="{{ url_for('views.admin_products') }}" class="admin-sidebar__link admin-sidebar__link--active"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg> Productos</a>
+            <a href="{{ url_for('views.admin_categories') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg> Categorías</a>
+            <a href="{{ url_for('views.admin_filters') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg> Filtros</a>
+            <a href="{{ url_for('views.admin_settings') }}" class="admin-sidebar__link"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg> Configuración</a>
+            <a href="{{ url_for('views.index') }}" class="admin-sidebar__link" style="margin-top: auto;"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg> Ver Tienda</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h2>Productos</h2>
+        </div>
+
+        <div class="action-bar">
+            <div></div>
+            <button class="btn btn--primary" onclick="openProductModal()">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-plus"></use></svg> Nuevo Producto
+            </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Img</th>
+                        <th>Nombre</th>
+                        <th>SKU</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th style="width: 100px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>
+                            {% if p.image_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + p.image_path) }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm);">
+                            {% else %}
+                            <div class="flex--center" style="width: 40px; height: 40px; background: var(--color-border); border-radius: var(--radius-sm);"><svg class="icon" style="width: 20px;"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-image"></use></svg></div>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: var(--font-weight-medium);">{{ p.name }}</td>
+                        <td style="color: var(--color-text-muted); font-size: var(--font-size-sm);">{{ p.sku or '-' }}</td>
+                        <td>{{ p.category.name if p.category else '-' }}</td>
+                        <td>{{ config.currency_symbol }}{{ p.price }}</td>
+                        <td>
+                            <span class="badge {% if p.stock > 0 %}badge--success{% else %}badge--danger{% endif %}">{{ p.stock }}</span>
+                        </td>
+                        <td>
+                            {% if p.is_active %}<span class="badge badge--primary">Activo</span>{% else %}<span class="badge" style="background: var(--color-border);">Inactivo</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn btn--icon btn--ghost" onclick='openProductModal({{ {"id": p.id, "name": p.name, "price": p.price|string, "stock": p.stock, "sku": p.sku, "description": p.description, "category_id": p.category_id, "is_active": p.is_active}|tojson }})'>
+                                    <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-edit"></use></svg>
+                                </button>
+                                <button class="btn btn--icon btn--ghost" style="color: var(--color-danger);" onclick="deleteProduct({{ p.id }})">
+                                    <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-trash"></use></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% include 'components/pagination.html' %}
+    </main>
+</div>
+
+<template id="product-modal-tpl">
+    <div class="modal__header">
+        <h3 id="modal-title">Nuevo Producto</h3>
+        <button class="btn btn--icon btn--ghost" onclick="hideModal()"><svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-x"></use></svg></button>
+    </div>
+    <form id="product-form" onsubmit="saveProduct(event)">
+        <div class="modal__body grid grid--2">
+            <input type="hidden" name="id" id="p-id">
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre *</label>
+                <input type="text" name="name" id="p-name" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Precio *</label>
+                <input type="number" step="0.01" name="price" id="p-price" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Stock</label>
+                <input type="number" name="stock" id="p-stock" class="form-input" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">SKU</label>
+                <input type="text" name="sku" id="p-sku" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Categoría</label>
+                <select name="category_id" id="p-category" class="form-select">
+                    <option value="">Ninguna</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Descripción</label>
+                <textarea name="description" id="p-description" class="form-textarea" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Imagen</label>
+                <input type="file" name="image" id="p-image" class="form-input" accept=".jpg,.jpeg,.png,.gif,.webp">
+            </div>
+            
+            <div class="form-group flex--center" style="justify-content: flex-start; gap: var(--space-2);">
+                <input type="checkbox" name="is_active" id="p-active" value="true" checked style="width: 18px; height: 18px;">
+                <label class="form-label" for="p-active" style="margin: 0;">Activo (Visible en tienda)</label>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick="hideModal()">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+    </form>
+</template>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+function openProductModal(data = null) {
+    showModal($('#product-modal-tpl').innerHTML);
+    if(data) {
+        $('#modal-title').textContent = 'Editar Producto';
+        $('#p-id').value = data.id;
+        $('#p-name').value = data.name;
+        $('#p-price').value = data.price;
+        $('#p-stock').value = data.stock;
+        $('#p-sku').value = data.sku || '';
+        $('#p-category').value = data.category_id || '';
+        $('#p-description').value = data.description || '';
+        $('#p-active').checked = data.is_active;
+    }
+}
+
+async function saveProduct(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const id = formData.get('id');
+    // If no active checkbox sent, formData doesn't include it. Wait, the checkbox has value="true". 
+    // If unchecked, we need to append false. Wait, standard html form behaviour.
+    if(!form.querySelector('#p-active').checked) {
+        formData.append('is_active', 'false');
+    }
+    
+    try {
+        if(id) {
+            await apiPut(`/products/${id}`, formData, true);
+        } else {
+            await apiPost('/products', formData, true);
+        }
+        showToast('Producto guardado');
+        window.location.reload();
+    } catch(err) {}
+}
+</script>
+{% endblock %}

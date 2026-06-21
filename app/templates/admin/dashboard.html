@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block layout %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar__logo">{{ config.site_name }}</div>
+        <nav class="admin-sidebar__nav">
+            <a href="{{ url_for('views.admin_dashboard') }}" class="admin-sidebar__link {% if request.endpoint == 'views.admin_dashboard' %}admin-sidebar__link--active{% endif %}">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-bar-chart"></use></svg> Dashboard
+            </a>
+            <a href="{{ url_for('views.admin_products') }}" class="admin-sidebar__link {% if request.endpoint == 'views.admin_products' %}admin-sidebar__link--active{% endif %}">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-package"></use></svg> Productos
+            </a>
+            <a href="{{ url_for('views.admin_categories') }}" class="admin-sidebar__link {% if request.endpoint == 'views.admin_categories' %}admin-sidebar__link--active{% endif %}">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-grid"></use></svg> Categorías
+            </a>
+            <a href="{{ url_for('views.admin_filters') }}" class="admin-sidebar__link {% if request.endpoint == 'views.admin_filters' %}admin-sidebar__link--active{% endif %}">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-filter"></use></svg> Filtros
+            </a>
+            <a href="{{ url_for('views.admin_settings') }}" class="admin-sidebar__link {% if request.endpoint == 'views.admin_settings' %}admin-sidebar__link--active{% endif %}">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-settings"></use></svg> Configuración
+            </a>
+            <a href="{{ url_for('views.index') }}" class="admin-sidebar__link" style="margin-top: auto;">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-external-link"></use></svg> Ver Tienda
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <h2>Dashboard</h2>
+            <button class="btn btn--icon admin-toggle" id="admin-toggle" style="display: none;">
+                <svg class="icon"><use href="{{ url_for('static', filename='icons/sprites.svg') }}#icon-menu"></use></svg>
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__label">Total Productos</div>
+                <div class="stat-card__value">{{ stats.total_products }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Productos Activos</div>
+                <div class="stat-card__value">{{ stats.active_products }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Categorías</div>
+                <div class="stat-card__value">{{ stats.total_categories }}</div>
+            </div>
+            <div class="stat-card" style="{% if stats.low_stock > 0 %}border-left-color: var(--color-danger);{% endif %}">
+                <div class="stat-card__label">Stock Bajo</div>
+                <div class="stat-card__value">{{ stats.low_stock }}</div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
