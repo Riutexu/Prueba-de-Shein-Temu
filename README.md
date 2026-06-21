@@ -28,27 +28,20 @@ Asegúrate de contar con Python 3.10+ instalado en la máquina anfitriona.
 ```bash
 # Navega a la raíz del proyecto
 cd c:\wamp64\www\UNELLEZ\
-
 # Instala las dependencias en modo offline (o a través de pip regular si estás preparando el servidor)
 pip install -r requirements.txt
 ```
-
 ### 2. Arranque del Servidor de Producción
-
 Ejecuta el bootstrapper. Este se encargará de crear toda la estructura de directorios necesaria (`db/`, `static/uploads/`, `logs/`), inicializar las tablas de base de datos e invocar al servidor de producción.
-
 ```bash
 python run.py
 ```
-
 El servidor quedará a la escucha en **http://0.0.0.0:8080**. Puedes acceder desde cualquier dispositivo en la misma red local a través de la IP de la máquina anfitriona (ej. `http://192.168.1.10:8080`).
 
 ## Panel de Administración
 
 Para acceder al gestor del catálogo, visita:
-
 **`http://<tu-ip>:8080/admin`**
-
 Allí encontrarás:
 - Dashboard de estadísticas.
 - Gestión CRUD de Productos y Categorías.
