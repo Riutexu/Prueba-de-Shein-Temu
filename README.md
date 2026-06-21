@@ -60,6 +60,7 @@ R: Verifica que tengas instalado Python 3.10+ y que las variables de entorno est
 
 ## ◈ Arquitectura Limpia ◈
 No mezclamos peras con manzanas:
+
 Views: Solo muestran lo que el usuario pide.
 
 Services: Aquí vive la lógica de negocio (nada de lógica en los endpoints).
