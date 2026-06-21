@@ -1,7 +1,7 @@
 # 🛒 E-Commerce Air-Gapped Engine
 *"El sistema de ventas para gente que no confía en el internet (o que simplemente no tiene)."*
 
-<img src="https://media.tenor.com/7-8nL_Sj35sAAAAM/cat-typing.gif" width="200" />
+<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqbmV0dHk4czh1OHV1OHV1OHV1OHV1OHV1OHV1OHV1OHV1JmVwPWdpZl9zZWFyY2hfZWQlM2Z2JTNkM35naWZfZ2lmJTI2Y3Q9Zw/3o7TKMGpxxHOGTdzJC/giphy.gif" width="200" />
 
 </div>
 
