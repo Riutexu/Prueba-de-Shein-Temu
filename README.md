@@ -3,8 +3,6 @@
 
 ## 🛒 E-Commerce Air-Gapped Engine
 
-*"El sistema de ventas para entornos aislados donde la fiabilidad es la única ley."*
-
 ---
 
 ## ◈ ¿Qué es este artefacto? ◈
