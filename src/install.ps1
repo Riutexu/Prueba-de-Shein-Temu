@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
     Lanzador Profesional TUI - Gestión de Entorno Python.
+    Versión 2.0 - Alta Resiliencia y Estilo Elegante.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -8,81 +9,106 @@ $ErrorActionPreference = "Stop"
 [Console]::InputEncoding  = [System.Text.Encoding]::UTF8
 
 # Configuración Visual
-$ESC   = [char]27
-$RESET = "$ESC[0m"
-$BOLD  = "$ESC[1m"
-$CYAN  = "$ESC[36m"
-$GREEN = "$ESC[32m"
-$RED   = "$ESC[31m"
-$GRAY  = "$ESC[90m"
+$ESC        = [char]27
+$RESET      = "$ESC[0m"
+$BOLD       = "$ESC[1m"
+$CYAN       = "$ESC[36m"
+$CYAN_LIGHT = "$ESC[96m"
+$MAGENTA    = "$ESC[35m"
+$WHITE      = "$ESC[97m"
+$GREEN      = "$ESC[92m"
+$RED        = "$ESC[91m"
+$GRAY       = "$ESC[90m"
 
+# Rutas
 $RepoRoot      = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) }
 $VenvPath      = Join-Path $RepoRoot ".venv"
 $VenvPython    = Join-Path $VenvPath "Scripts\python.exe"
 $RunScript     = Join-Path $RepoRoot "run.py"
-$AppUrl        = "http://127.0.0.1:5000"
+$AppUrl        = "http://127.0.0.1:8080"
 
 function Show-Header {
     Clear-Host
-    Write-Host "${BOLD}${CYAN}=================================================="
-    Write-Host "         SISTEMA DE GESTIÓN DE APLICACIÓN         "
-    Write-Host "==================================================${RESET}`n"
+    Write-Host ""
+    Write-Host "${CYAN} ╔══════════════════════════════════════════════╗"
+    Write-Host " ║       SISTEMA DE GESTIÓN DE APLICACIÓN       ║"
+    Write-Host " ╚══════════════════════════════════════════════╝"
+    Write-Host ""
+}
+
+function Kill-AppProcesses {
+    Get-Process -Name "python" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$VenvPath*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 1
 }
 
 function Invoke-App {
-    Write-Host "${GREEN}[*] Iniciando aplicación y lanzando navegador...${RESET}"
-    # Ejecuta en una ventana oculta redirigiendo errores al vacío (solución a Waitress)
+    Write-Host "${GREEN} [*] Iniciando aplicación y lanzando navegador...${RESET}"
     Start-Process -FilePath "cmd" -ArgumentList "/c `"$VenvPython`" `"$RunScript`" 2> `"$null`"" -WindowStyle Hidden
     Start-Sleep -Seconds 3
     Start-Process $AppUrl
-    exit
 }
 
-# --- BUCLE DE MENÚ TUI ---
+# --- BUCLE PRINCIPAL ---
 $salir = $false
 while (-not $salir) {
     Show-Header
-    Write-Host " 1) ${CYAN}Arrancar Sistema${RESET}"
-    Write-Host " 2) ${CYAN}Instalar / Configurar Dependencias${RESET}"
-    Write-Host " 3) ${CYAN}Reparar Entorno${RESET}"
-    Write-Host " 4) ${CYAN}Desinstalar${RESET}"
-    Write-Host " 5) ${RED}Salir${RESET}"
-    Write-Host "`n"
+    Write-Host "  ${CYAN_LIGHT}1)${WHITE} Arrancar Sistema"
+    Write-Host "  ${CYAN_LIGHT}2)${WHITE} Instalar / Configurar Dependencias"
+    Write-Host "  ${CYAN_LIGHT}3)${WHITE} Reparar Entorno"
+    Write-Host "  ${CYAN_LIGHT}4)${WHITE} Desinstalar"
+    Write-Host "  ${RED}5)${WHITE} Salir"
+    Write-Host ""
     
-    $choice = Read-Host " Seleccione una opción"
-
+    $choice = Read-Host "  ${MAGENTA}▶${WHITE} Seleccione una opción"
+    
     try {
         switch ($choice) {
             "1" {
-                if (Test-Path $VenvPython) { Invoke-App }
-                else { Write-Host "${RED}[!] Entorno no encontrado. Opción 2 primero.${RESET}"; Start-Sleep -Seconds 2 }
-            }
+    if (Test-Path $VenvPython) {
+        Write-Host "${GREEN} [*] Arrancando sistema...${RESET}"
+        
+        # FORZAR EJECUCIÓN DESDE LA CARPETA RAÍZ
+        # Esto soluciona errores de "File not found" o rutas relativas incorrectas
+        $cmd = "cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`""
+        
+        Start-Process -FilePath "cmd" -ArgumentList "/c $cmd" -WindowStyle Hidden
+        
+        Write-Host "${GRAY} [+] Servidor iniciado. El navegador se abrirá en breve...${RESET}"
+        Start-Sleep -Seconds 2
+    }
+    else {
+        Write-Host "`n ${RED}[!] Entorno no encontrado. Configure primero.${RESET}"
+        Start-Sleep -Seconds 2
+    }
+}
             "2" {
-                Write-Host "${GREEN}[*] Instalando dependencias...${RESET}"
+                Write-Host "`n ${GREEN}[*] Instalando dependencias...${RESET}"
                 & python -m venv $VenvPath
                 & $VenvPython -m pip install --upgrade pip --quiet
                 & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --quiet
-                Write-Host "${GREEN}[+] Configuración exitosa.${RESET}"; Start-Sleep -Seconds 2
+                Write-Host " ${GREEN}[+] Configuración exitosa.${RESET}"; Start-Sleep -Seconds 2
             }
             "3" {
-                Write-Host "${CYAN}[*] Reparando...${RESET}"
-                Remove-Item $VenvPath -Recurse -Force -ErrorAction SilentlyContinue
+                Write-Host "`n ${CYAN}[*] Reparando entorno...${RESET}"
+                Kill-AppProcesses
+                if (Test-Path $VenvPath) { Remove-Item $VenvPath -Recurse -Force -ErrorAction SilentlyContinue }
                 & python -m venv $VenvPath
                 & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --quiet
-                Write-Host "${GREEN}[+] Reparación completa.${RESET}"; Start-Sleep -Seconds 2
+                Write-Host " ${GREEN}[+] Reparación completa.${RESET}"; Start-Sleep -Seconds 2
             }
             "4" {
-                $confirm = Read-Host "${RED}[!] ¿Confirmar desinstalación? (s/n)${RESET}"
+                $confirm = Read-Host "`n ${RED}[!] ¿Confirmar desinstalación total? (s/n)${RESET}"
                 if ($confirm -eq "s") {
+                    Kill-AppProcesses
                     Remove-Item $VenvPath -Recurse -Force -ErrorAction SilentlyContinue
-                    Write-Host "${GRAY}[-] Entorno eliminado.${RESET}"; Start-Sleep -Seconds 2
+                    Write-Host " ${GRAY}[-] Entorno eliminado.${RESET}"; Start-Sleep -Seconds 2
                 }
             }
             "5" { $salir = $true }
-            Default { Write-Host "${RED}Opción no válida.${RESET}"; Start-Sleep -Seconds 1 }
+            Default { Write-Host "`n ${RED}Opción no válida.${RESET}"; Start-Sleep -Seconds 1 }
         }
     } catch {
-        Write-Host "${RED}`n[!] Error crítico: $_${RESET}"
-        Read-Host "Presione ENTER para continuar..."
+        Write-Host "`n ${RED}[!] Error crítico: $_${RESET}"
+        Read-Host " Presione ENTER para continuar..."
     }
 }
