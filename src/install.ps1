@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Lanzador Profesional TUI - Gestión de Entorno Python.
-    Versión 2.0 - Alta Resiliencia y Estilo Elegante.
+    Versión 2.0.1 - Corregida, optimizada y lista para producción.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,6 @@ $ErrorActionPreference = "Stop"
 # Configuración Visual
 $ESC        = [char]27
 $RESET      = "$ESC[0m"
-$BOLD       = "$ESC[1m"
 $CYAN       = "$ESC[36m"
 $CYAN_LIGHT = "$ESC[96m"
 $MAGENTA    = "$ESC[35m"
@@ -21,31 +20,22 @@ $RED        = "$ESC[91m"
 $GRAY       = "$ESC[90m"
 
 # Rutas
-$RepoRoot      = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) }
-$VenvPath      = Join-Path $RepoRoot ".venv"
-$VenvPython    = Join-Path $VenvPath "Scripts\python.exe"
-$RunScript     = Join-Path $RepoRoot "run.py"
-$AppUrl        = "http://127.0.0.1:8080"
+$RepoRoot   = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) }
+$VenvPath   = Join-Path $RepoRoot ".venv"
+$VenvPython = Join-Path $VenvPath "Scripts\python.exe"
+$RunScript  = Join-Path $RepoRoot "run.py"
+$AppUrl     = "http://127.0.0.1:8080"
 
 function Show-Header {
     Clear-Host
-    Write-Host ""
-    Write-Host "${CYAN} ╔══════════════════════════════════════════════╗"
-    Write-Host " ║       SISTEMA DE GESTIÓN DE APLICACIÓN       ║"
-    Write-Host " ╚══════════════════════════════════════════════╝"
-    Write-Host ""
+    Write-Host "`n${CYAN} ╔══════════════════════════════════════════════╗"
+    Write-Host " ║      SISTEMA DE GESTIÓN DE APLICACIÓN        ║"
+    Write-Host " ╚══════════════════════════════════════════════╝`n"
 }
 
 function Kill-AppProcesses {
     Get-Process -Name "python" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$VenvPath*" } | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
-}
-
-function Invoke-App {
-    Write-Host "${GREEN} [*] Iniciando aplicación y lanzando navegador...${RESET}"
-    Start-Process -FilePath "cmd" -ArgumentList "/c `"$VenvPython`" `"$RunScript`" 2> `"$null`"" -WindowStyle Hidden
-    Start-Sleep -Seconds 3
-    Start-Process $AppUrl
 }
 
 # --- BUCLE PRINCIPAL ---
@@ -64,36 +54,34 @@ while (-not $salir) {
     try {
         switch ($choice) {
             "1" {
-    if (Test-Path $VenvPython) {
-        Write-Host "${GREEN} [*] Arrancando sistema...${RESET}"
-        
-        # FORZAR EJECUCIÓN DESDE LA CARPETA RAÍZ
-        # Esto soluciona errores de "File not found" o rutas relativas incorrectas
-        $cmd = "cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`""
-        
-        Start-Process -FilePath "cmd" -ArgumentList "/c $cmd" -WindowStyle Hidden
-        
-        Write-Host "${GRAY} [+] Servidor iniciado. El navegador se abrirá en breve...${RESET}"
-        Start-Sleep -Seconds 2
-    }
-    else {
-        Write-Host "`n ${RED}[!] Entorno no encontrado. Configure primero.${RESET}"
-        Start-Sleep -Seconds 2
-    }
-}
+                if (Test-Path $VenvPython) {
+                    Write-Host "${GREEN} [*] Arrancando sistema...${RESET}"
+                    $cmd = "cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`""
+                    Start-Process -FilePath "cmd" -ArgumentList "/c $cmd" -WindowStyle Hidden
+                    Write-Host "${GRAY} [+] Servidor iniciado. Accediendo a $AppUrl...${RESET}"
+                    Start-Sleep -Seconds 2
+                    Start-Process $AppUrl
+                } else {
+                    Write-Host "`n ${RED}[!] Entorno no encontrado. Configure primero.${RESET}"
+                    Start-Sleep -Seconds 2
+                }
+            }
             "2" {
                 Write-Host "`n ${GREEN}[*] Instalando dependencias...${RESET}"
-                & python -m venv $VenvPath
-                & $VenvPython -m pip install --upgrade pip --quiet
-                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --quiet
+                if (-not (Test-Path $VenvPath)) {
+                    & python -m venv $VenvPath
+                }
+                & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
+                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
                 Write-Host " ${GREEN}[+] Configuración exitosa.${RESET}"; Start-Sleep -Seconds 2
             }
             "3" {
                 Write-Host "`n ${CYAN}[*] Reparando entorno...${RESET}"
                 Kill-AppProcesses
-                if (Test-Path $VenvPath) { Remove-Item $VenvPath -Recurse -Force -ErrorAction SilentlyContinue }
+                if (Test-Path $VenvPath) { Remove-Item $VenvPath -Recurse -Force }
                 & python -m venv $VenvPath
-                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --quiet
+                & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
+                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
                 Write-Host " ${GREEN}[+] Reparación completa.${RESET}"; Start-Sleep -Seconds 2
             }
             "4" {
@@ -108,7 +96,7 @@ while (-not $salir) {
             Default { Write-Host "`n ${RED}Opción no válida.${RESET}"; Start-Sleep -Seconds 1 }
         }
     } catch {
-        Write-Host "`n ${RED}[!] Error crítico: $_${RESET}"
+        Write-Host "`n ${RED}[!] Error crítico: $($_.Exception.Message)${RESET}"
         Read-Host " Presione ENTER para continuar..."
     }
 }
