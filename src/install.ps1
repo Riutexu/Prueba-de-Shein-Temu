@@ -1,71 +1,69 @@
-<#
-.SYNOPSIS
-    Lanzador Maestro - Instalación y Gestión de Entorno Python.
-    Versión 3.0 - Integración total de despliegue y gestión.
-#>
-
+# --- CONFIGURACIÓN DE ENTORNO ---
 $ErrorActionPreference = "Stop"
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+$targetDir = Join-Path ([Environment]::GetFolderPath('Desktop')) "Prueba-de-Shein-Temu"
 
-# Configuración Visual
-$CYAN_LIGHT = "$([char]27)[96m"; $WHITE = "$([char]27)[97m"; $GREEN = "$([char]27)[92m"
-$RED = "$([char]27)[91m"; $MAGENTA = "$([char]27)[35m"; $RESET = "$([char]27)[0m"
-
-# Rutas
-$RepoRoot   = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) }
-$VenvPath   = Join-Path $RepoRoot ".venv"
-$VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-$RunScript  = Join-Path $RepoRoot "run.py"
-
-function Show-Header {
-    Clear-Host
-    Write-Host "`n${CYAN_LIGHT} ╔══════════════════════════════════════════════╗"
-    Write-Host " ║      SISTEMA DE GESTIÓN Y DESPLIEGUE         ║"
-    Write-Host " ╚══════════════════════════════════════════════╝`n"
+# Asegurar que estamos en el directorio de destino
+if ($PWD.Path -ne $targetDir) {
+    if (-not (Test-Path $targetDir)) { New-Item -Path $targetDir -ItemType Directory | Out-Null }
+    Set-Location $targetDir
 }
 
-# --- MENÚ PRINCIPAL ---
-$salir = $false
-while (-not $salir) {
-    Show-Header
-    Write-Host "  ${CYAN_LIGHT}1)${WHITE} Arrancar Sistema"
-    Write-Host "  ${CYAN_LIGHT}2)${WHITE} Instalar / Actualizar Sistema (Despliegue Remoto)"
-    Write-Host "  ${CYAN_LIGHT}3)${WHITE} Configurar/Reparar Entorno Python"
-    Write-Host "  ${RED}4)${WHITE} Salir"
-    Write-Host ""
+# --- TUI TÁCTICA (Configuración de Colores) ---
+$RGB_CYAN    = "`e[38;2;0;255;255m"
+$RGB_MAGENTA = "`e[38;2;255;0;255m"
+$RGB_GREEN   = "`e[38;2;50;255;50m"
+$RESET       = "`e[0m"
+
+function Draw-Bar {
+    param($percent)
+    $width = 30
+    $filled = [math]::Floor(($percent / 100) * $width)
+    $bar = ("█" * $filled).PadRight($width, "░")
+    Write-Host -NoNewline "`r $RGB_MAGENTA[$bar] $percent% $RESET"
+}
+
+function Draw-Menu {
+    param([int]$Selected)
+    Clear-Host
+    Write-Host "`n $RGB_CYAN ╔══════════════════════════════════════════════╗"
+    Write-Host " ║          TERMINAL TÁCTICA DE GESTIÓN         ║"
+    Write-Host " ╚══════════════════════════════════════════════╝$RESET`n"
     
-    $choice = Read-Host "  ${MAGENTA}▶${WHITE} Seleccione una opción"
-    
-    switch ($choice) {
-        "1" {
-            if (Test-Path $VenvPython) {
-                Start-Process "cmd" -ArgumentList "/c cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`"" -WindowStyle Hidden
-                Write-Host "${GREEN} [*] Servidor iniciado.${RESET}"; Start-Sleep -Seconds 2
-            } else { Write-Host "${RED}[!] Entorno no detectado.${RESET}"; Start-Sleep -Seconds 2 }
-        }
-        "2" {
-            # Lógica de Despliegue Integrada
-            Write-Host "${GREEN}[*] Iniciando descarga de repositorio remoto...${RESET}"
-            try {
-                $zip = Join-Path $env:TEMP "repo.zip"
-                $tmp = Join-Path $env:TEMP "tmp_extract"
-                Invoke-WebRequest -Uri "https://github.com/Riutexu/Prueba-de-Shein-Temu/archive/refs/heads/main.zip" -OutFile $zip
-                Expand-Archive $zip -DestinationPath $tmp -Force
-                $root = (Get-ChildItem $tmp -Directory).FullName
-                Copy-Item -Path "$root\*" -Destination $RepoRoot -Recurse -Force
-                Remove-Item $zip, $tmp -Recurse -Force
-                Write-Host "${GREEN}[+] Despliegue exitoso. Por favor reinicie el lanzador.${RESET}"
-            } catch { Write-Host "${RED}[!] Error: $($_.Exception.Message)${RESET}" }
-            Start-Sleep -Seconds 3
-        }
-        "3" {
-            Write-Host "${GREEN}[*] Configurando entorno local...${RESET}"
-            if (-not (Test-Path $VenvPath)) { & python -m venv $VenvPath }
-            & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
-            & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
-            Write-Host "${GREEN}[+] Entorno listo.${RESET}"; Start-Sleep -Seconds 2
-        }
-        "4" { $salir = $true }
+    $items = @(" ARRANCAR SISTEMA", " INSTALAR DEPENDENCIAS", " REPARAR ENTORNO", " SALIR")
+    for ($i = 0; $i -lt $items.Count; $i++) {
+        if ($i -eq $Selected) { Write-Host " $RGB_MAGENTA >$items[$i] <$RESET" } 
+        else { Write-Host "   $items[$i]" }
     }
+}
+
+# --- BUCLE DE INTERACCIÓN ---
+$sel = 0
+while ($true) {
+    Draw-Menu -Selected $sel
+    $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    if ($key.VirtualKeyCode -eq 38) { $sel = ($sel - 1 + 4) % 4 }
+    if ($key.VirtualKeyCode -eq 40) { $sel = ($sel + 1) % 4 }
+    if ($key.VirtualKeyCode -eq 13) { break }
+}
+
+# --- PROCESAMIENTO ---
+Clear-Host
+Write-Host "$RGB_CYAN [*] INICIANDO PROCESO... $RESET`n"
+for ($i = 0; $i -le 100; $i+=10) { Draw-Bar -percent $i; Start-Sleep -Milliseconds 100 }
+
+switch ($sel) {
+    0 { 
+        if (Test-Path ".venv/Scripts/python.exe") { & .venv/Scripts/python.exe run.py } 
+        else { Write-Host "`n$RGB_MAGENTA [!] Entorno no detectado. Instala dependencias primero. $RESET" }
+    }
+    1 { 
+        Write-Host "`n$RGB_GREEN [!] Desplegando entorno virtual y dependencias... $RESET"
+        python -m venv .venv; .venv/Scripts/pip install -r requirements.txt
+    }
+    2 { 
+        Write-Host "`n$RGB_MAGENTA [!] Purga de entorno completada. $RESET"
+        Remove-Item .venv -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    3 { exit }
 }
