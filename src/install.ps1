@@ -1,19 +1,22 @@
 # --- CONFIGURACIÓN DE ENTORNO BLINDADA ---
 $ErrorActionPreference = "Stop"
 
-# Obtenemos la ruta mediante el objeto del script activo
-$scriptPath = (Get-Variable MyInvocation -Scope Global).Value.MyCommand.Definition
-if (-not $scriptPath) { 
-    # Fallback si MyInvocation falla por ejecución directa
-    $scriptPath = $PSCommandPath 
-}
+# 1. Autodetección absoluta del script
+$scriptPath = $PSCommandPath
+if (-not $scriptPath) { $scriptPath = (Get-Variable MyInvocation -Scope Global).Value.MyCommand.Definition }
 
 $scriptDir  = Split-Path -Parent $scriptPath
 $projectDir = Split-Path -Parent $scriptDir
 
-# Validación de seguridad: si projectDir sigue siendo erróneo, forzamos la ruta al escritorio
-if (-not (Test-Path (Join-Path $projectDir "requirements.txt"))) {
-    $projectDir = Join-Path ([Environment]::GetFolderPath('Desktop')) "Prueba-de-Shein-Temu"
+# 2. SALTO DE SEGURIDAD: Nos movemos a la raíz del proyecto para evitar errores de contexto
+Set-Location -Path $projectDir
+
+# 3. Validación de archivos
+if (-not (Test-Path "requirements.txt")) {
+    Write-Host "[!] ERROR: No se encontró requirements.txt en $projectDir" -ForegroundColor Red
+    Write-Host "[!] Ejecuta este script desde la carpeta src/ o verifica la estructura." -ForegroundColor Yellow
+    Start-Sleep -Seconds 5
+    exit
 }
 
 $Cfg = [PSCustomObject]@{ 
@@ -63,21 +66,16 @@ do {
             else { Write-Host "[!] ERROR: Entorno no detectado. Instala dependencias primero." -ForegroundColor Red; Start-Sleep -Seconds 2 }
         }
         1 { 
-            if (Test-Path $Cfg.Reqs) {
-                Show-Section "INSTALANDO DEPENDENCIAS"
-                python -m venv (Join-Path $Cfg.TargetDir ".venv")
-                & $Cfg.Pip install -r $Cfg.Reqs
-                
-                if ($LASTEXITCODE -eq 0) {
-                    Show-Section "INSTALACION EXITOSA"
-                    Show-Section "LANZANDO PROGRAMA"
-                    & $Cfg.Python $Cfg.Run
-                } else {
-                    Write-Host "`n[!] ERROR: La instalación falló." -ForegroundColor Red; Start-Sleep -Seconds 3
-                }
+            Show-Section "INSTALANDO DEPENDENCIAS"
+            python -m venv (Join-Path $Cfg.TargetDir ".venv")
+            & $Cfg.Pip install -r $Cfg.Reqs
+            
+            if ($LASTEXITCODE -eq 0) {
+                Show-Section "INSTALACION EXITOSA"
+                Show-Section "LANZANDO PROGRAMA"
+                & $Cfg.Python $Cfg.Run
             } else {
-                Write-Host "`n[!] ERROR: requirements.txt no encontrado en $($Cfg.TargetDir)" -ForegroundColor Red
-                Start-Sleep -Seconds 3
+                Write-Host "`n[!] ERROR: La instalación falló." -ForegroundColor Red; Start-Sleep -Seconds 3
             }
         }
         2 { 
