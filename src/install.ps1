@@ -1,53 +1,42 @@
-# --- CONFIGURACIÓN DE ENTORNO BLINDADA ---
+# --- CONFIGURACIÓN E INTEGRIDAD ---
 $ErrorActionPreference = "Stop"
-
-# 1. Autodetección absoluta del script
 $scriptPath = $PSCommandPath
-if (-not $scriptPath) { $scriptPath = (Get-Variable MyInvocation -Scope Global).Value.MyCommand.Definition }
+$projectDir = Split-Path (Split-Path $scriptPath -Parent) -Parent
 
-$scriptDir  = Split-Path -Parent $scriptPath
-$projectDir = Split-Path -Parent $scriptDir
-
-# 2. SALTO DE SEGURIDAD: Nos movemos a la raíz del proyecto para evitar errores de contexto
+# Forzamos la navegación al contexto del proyecto
 Set-Location -Path $projectDir
 
-# 3. Validación de archivos
-if (-not (Test-Path "requirements.txt")) {
-    Write-Host "[!] ERROR: No se encontró requirements.txt en $projectDir" -ForegroundColor Red
-    Write-Host "[!] Ejecuta este script desde la carpeta src/ o verifica la estructura." -ForegroundColor Yellow
-    Start-Sleep -Seconds 5
-    exit
+# Definición de esquema de rutas (Inmutable)
+$Cfg = [PSCustomObject]@{
+    Env      = Join-Path $projectDir ".venv"
+    Python   = Join-Path $projectDir ".venv\Scripts\python.exe"
+    Pip      = Join-Path $projectDir ".venv\Scripts\pip.exe"
+    Reqs     = Join-Path $projectDir "requirements.txt"
+    Run      = Join-Path $projectDir "run.py"
 }
 
-$Cfg = [PSCustomObject]@{ 
-    TargetDir = $projectDir
-    Python    = Join-Path $projectDir ".venv\Scripts\python.exe"
-    Pip       = Join-Path $projectDir ".venv\Scripts\pip.exe"
-    Reqs      = Join-Path $projectDir "requirements.txt"
-    Run       = Join-Path $projectDir "run.py"
-}
-
+# --- LÓGICA DE INTERFAZ ---
 function Show-Menu {
     param([int]$Selected)
     Clear-Host
     Write-Host "`n ==========================================" -ForegroundColor Cyan
-    Write-Host "    TERMINAL TACTICA DE GESTION"
+    Write-Host "    TERMINAL TACTICA DE GESTION [SR-V1]"
     Write-Host " ==========================================`n" -ForegroundColor Cyan
-    $items = @(" ARRANCAR SISTEMA", " INSTALAR DEPENDENCIAS", " REPARAR ENTORNO", " SALIR")
+    $items = @(" ARRANQUE", " DESPLIEGUE/DEPENDENCIAS", " SANEAMIENTO", " SALIR")
     for ($i = 0; $i -lt $items.Count; $i++) {
-        if ($i -eq $Selected) { Write-Host "  >> $($items[$i]) <<" -ForegroundColor Magenta }
-        else { Write-Host "     $($items[$i])" }
+        $color = if ($i -eq $Selected) { "Magenta" } else { "Gray" }
+        $prefix = if ($i -eq $Selected) { "  >> " } else { "     " }
+        Write-Host "$prefix $($items[$i])" -ForegroundColor $color
     }
 }
 
 function Show-Section {
     param([string]$Title)
-    Write-Host "`n==========================================" -ForegroundColor Cyan
-    Write-Host " $Title" -ForegroundColor White
-    Write-Host "==========================================" -ForegroundColor Cyan
+    Write-Host "`n>>> $Title" -ForegroundColor Cyan
+    Write-Host ("=" * ($Title.Length + 4)) -ForegroundColor DarkCyan
 }
 
-# --- BUCLE PRINCIPAL ---
+# --- MOTOR DE EJECUCIÓN ---
 $exitSystem = $false
 do {
     $sel = 0
@@ -55,32 +44,38 @@ do {
         Show-Menu -Selected $sel
         $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         if ($key.VirtualKeyCode -eq 38) { $sel = ($sel - 1 + 4) % 4 }
-        if ($key.VirtualKeyCode -eq 40) { $sel = ($sel + 1) % 4 }
-        if ($key.VirtualKeyCode -eq 13) { break }
+        elseif ($key.VirtualKeyCode -eq 40) { $sel = ($sel + 1) % 4 }
+        elseif ($key.VirtualKeyCode -eq 13) { break }
     }
 
     Clear-Host
     switch ($sel) {
         0 { 
-            if (Test-Path $Cfg.Python) { & $Cfg.Python $Cfg.Run } 
-            else { Write-Host "[!] ERROR: Entorno no detectado. Instala dependencias primero." -ForegroundColor Red; Start-Sleep -Seconds 2 }
-        }
-        1 { 
-            Show-Section "INSTALANDO DEPENDENCIAS"
-            python -m venv (Join-Path $Cfg.TargetDir ".venv")
-            & $Cfg.Pip install -r $Cfg.Reqs
-            
-            if ($LASTEXITCODE -eq 0) {
-                Show-Section "INSTALACION EXITOSA"
-                Show-Section "LANZANDO PROGRAMA"
-                & $Cfg.Python $Cfg.Run
-            } else {
-                Write-Host "`n[!] ERROR: La instalación falló." -ForegroundColor Red; Start-Sleep -Seconds 3
+            if (Test-Path $Cfg.Python) { 
+                Show-Section "INICIANDO SISTEMA"
+                & $Cfg.Python $Cfg.Run 
+            } else { 
+                Write-Host "[!] ERROR: Entorno no inicializado. Seleccione opción 2." -ForegroundColor Red; Start-Sleep -Seconds 2 
             }
         }
+        1 { 
+            Show-Section "PROCESO DE DESPLIEGUE"
+            if (-not (Test-Path $Cfg.Reqs)) { 
+                Write-Host "[!] CRÍTICO: requirements.txt ausente." -ForegroundColor Red 
+            } else {
+                python -m venv $Cfg.Env
+                & $Cfg.Pip install -r $Cfg.Reqs
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "[+] Instalación completada con éxito." -ForegroundColor Green
+                    & $Cfg.Python $Cfg.Run
+                }
+            }
+            Start-Sleep -Seconds 2
+        }
         2 { 
-            Remove-Item (Join-Path $Cfg.TargetDir ".venv") -Recurse -Force -ErrorAction SilentlyContinue
-            Write-Host "`n[!] Entorno purgado." -ForegroundColor Magenta; Start-Sleep -Seconds 1
+            Show-Section "SANEAMIENTO DE ENTORNO"
+            Remove-Item $Cfg.Env -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "[+] Entorno virtual purgado." -ForegroundColor Magenta; Start-Sleep -Seconds 1
         }
         3 { $exitSystem = $true }
     }
