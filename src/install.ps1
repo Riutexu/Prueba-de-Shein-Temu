@@ -2,33 +2,25 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "Stop"
 
-# Carácter de escape ANSI real
-$ESC = [char]27
-$RGB_CYAN    = "$ESC[38;2;0;255;255m"
-$RGB_MAGENTA = "$ESC[38;2;255;0;255m"
-$RGB_GREEN   = "$ESC[38;2;50;255;50m"
-$RESET       = "$ESC[0m"
-
-function Show-Bar {
-    param($percent)
-    $width = 30
-    $filled = [math]::Floor(($percent / 100) * $width)
-    # Usamos caracteres simples para evitar problemas de codificación
-    $bar = ("#" * $filled).PadRight($width, "-")
-    Write-Host -NoNewline "`r $RGB_MAGENTA [$bar] $percent% $RESET"
-}
+# --- CONFIGURACIÓN DE COLORES ---
+# Usamos directamente las secuencias de control ANSI estándar
+$CYAN_ON  = "$([char]27)[38;2;0;255;255m"
+$MAG_ON   = "$([char]27)[38;2;255;0;255m"
+$GRN_ON   = "$([char]27)[38;2;50;255;50m"
+$RESET    = "$([char]27)[0m"
 
 function Show-Menu {
     param([int]$Selected)
     Clear-Host
-    Write-Host "`n$RGB_CYAN =========================================="
+    # Usamos Write-Host con las variables de color directamente
+    Write-Host "`n$CYAN_ON=========================================="
     Write-Host "    TERMINAL TACTICA DE GESTION"
     Write-Host " ==========================================$RESET`n"
     
     $items = @(" ARRANCAR SISTEMA", " INSTALAR DEPENDENCIAS", " REPARAR ENTORNO", " SALIR")
     for ($i = 0; $i -lt $items.Count; $i++) {
         if ($i -eq $Selected) { 
-            Write-Host "$RGB_MAGENTA  >> $($items[$i]) <<$RESET" 
+            Write-Host "$MAG_ON  >> $($items[$i]) <<$RESET" 
         } else { 
             Write-Host "     $($items[$i])" 
         }
