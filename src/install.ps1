@@ -1,10 +1,17 @@
-# --- CONFIGURACIÓN DE RUTA AUTOMÁTICA ---
-# Esto obtiene la ubicación real del archivo, sin importar desde dónde lo lances.
-$scriptPath = $MyInvocation.MyCommand.Path
-$scriptDir  = Split-Path -Parent $scriptPath
+# --- CONFIGURACIÓN DE ENTORNO ---
+$ErrorActionPreference = "Stop"
+# Obtenemos la ruta absoluta de donde vive este script y retrocedemos al directorio raíz
+$scriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $projectDir = Split-Path -Parent $scriptDir
 
-$ErrorActionPreference = "Stop"
+# Estructura de configuración inyectable
+$Cfg = [PSCustomObject]@{ 
+    TargetDir = $projectDir
+    Python    = Join-Path $projectDir ".venv\Scripts\python.exe"
+    Pip       = Join-Path $projectDir ".venv\Scripts\pip.exe"
+    Reqs      = Join-Path $projectDir "requirements.txt"
+    Run       = Join-Path $projectDir "run.py"
+}
 
 function Show-Menu {
     param([int]$Selected)
@@ -41,31 +48,29 @@ do {
     Clear-Host
     switch ($sel) {
         0 { 
-            $py = Join-Path $projectDir ".venv\Scripts\python.exe"
-            if (Test-Path $py) { & $py (Join-Path $projectDir "run.py") } 
-            else { Write-Host "[!] ERROR: Entorno no detectado." -ForegroundColor Red; Start-Sleep -Seconds 2 }
+            if (Test-Path $Cfg.Python) { & $Cfg.Python $Cfg.Run } 
+            else { Write-Host "[!] ERROR: Entorno no detectado. Instala dependencias primero." -ForegroundColor Red; Start-Sleep -Seconds 2 }
         }
         1 { 
-            $req = Join-Path $projectDir "requirements.txt"
-            if (Test-Path $req) {
+            if (Test-Path $Cfg.Reqs) {
                 Show-Section "INSTALANDO DEPENDENCIAS"
-                python -m venv (Join-Path $projectDir ".venv")
-                & (Join-Path $projectDir ".venv\Scripts\pip.exe") install -r $req
+                python -m venv (Join-Path $Cfg.TargetDir ".venv")
+                & $Cfg.Pip install -r $Cfg.Reqs
                 
                 if ($LASTEXITCODE -eq 0) {
                     Show-Section "INSTALACION EXITOSA"
                     Show-Section "LANZANDO PROGRAMA"
-                    & (Join-Path $projectDir ".venv\Scripts\python.exe") (Join-Path $projectDir "run.py")
+                    & $Cfg.Python $Cfg.Run
                 } else {
                     Write-Host "`n[!] ERROR: La instalación falló." -ForegroundColor Red; Start-Sleep -Seconds 3
                 }
             } else {
-                Write-Host "`n[!] ERROR: No se encuentra requirements.txt en $projectDir" -ForegroundColor Red
+                Write-Host "`n[!] ERROR: requirements.txt no encontrado en $($Cfg.TargetDir)" -ForegroundColor Red
                 Start-Sleep -Seconds 3
             }
         }
         2 { 
-            Remove-Item (Join-Path $projectDir ".venv") -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item (Join-Path $Cfg.TargetDir ".venv") -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "`n[!] Entorno purgado." -ForegroundColor Magenta; Start-Sleep -Seconds 1
         }
         3 { $exitSystem = $true }
