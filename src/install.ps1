@@ -1,10 +1,21 @@
-# --- CONFIGURACIÓN DE ENTORNO ---
+# --- CONFIGURACIÓN DE ENTORNO BLINDADA ---
 $ErrorActionPreference = "Stop"
-# Obtenemos la ruta absoluta de donde vive este script y retrocedemos al directorio raíz
-$scriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Obtenemos la ruta mediante el objeto del script activo
+$scriptPath = (Get-Variable MyInvocation -Scope Global).Value.MyCommand.Definition
+if (-not $scriptPath) { 
+    # Fallback si MyInvocation falla por ejecución directa
+    $scriptPath = $PSCommandPath 
+}
+
+$scriptDir  = Split-Path -Parent $scriptPath
 $projectDir = Split-Path -Parent $scriptDir
 
-# Estructura de configuración inyectable
+# Validación de seguridad: si projectDir sigue siendo erróneo, forzamos la ruta al escritorio
+if (-not (Test-Path (Join-Path $projectDir "requirements.txt"))) {
+    $projectDir = Join-Path ([Environment]::GetFolderPath('Desktop')) "Prueba-de-Shein-Temu"
+}
+
 $Cfg = [PSCustomObject]@{ 
     TargetDir = $projectDir
     Python    = Join-Path $projectDir ".venv\Scripts\python.exe"
