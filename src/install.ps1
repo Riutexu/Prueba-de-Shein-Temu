@@ -41,16 +41,24 @@ do {
                 Write-Host "[!] ERROR: Entorno no detectado." -ForegroundColor Red; Start-Sleep -Seconds 2 
             }
         }
-        1 { 
-            Show-Section "INSTALANDO DEPENDENCIAS"
-            python -m venv .venv
-            & .venv\Scripts\pip install -r requirements.txt
+       1 { 
+            $reqPath = Join-Path $targetDir "requirements.txt"
             
-            Show-Section "INSTALACION EXITOSA"
-            Show-Section "VERIFICANDO"
-            Start-Sleep -Seconds 1
-            Show-Section "LANZANDO PROGRAMA AUTOMATICAMENTE"
-            & .venv\Scripts\python.exe run.py
+            if (Test-Path $reqPath) {
+                Show-Section "INSTALANDO DEPENDENCIAS"
+                python -m venv "$targetDir\.venv"
+                & "$targetDir\.venv\Scripts\pip.exe" install -r $reqPath
+                
+                Show-Section "INSTALACION EXITOSA"
+                Show-Section "VERIFICANDO"
+                Start-Sleep -Seconds 1
+                
+                Show-Section "LANZANDO PROGRAMA AUTOMATICAMENTE"
+                & "$targetDir\.venv\Scripts\python.exe" "$targetDir\run.py"
+            } else {
+                Write-Host "[!] ERROR CRÍTICO: No se encuentra 'requirements.txt' en $reqPath" -ForegroundColor Red
+                Start-Sleep -Seconds 3
+            }
         }
         2 { 
             Write-Host "`n[!] Purga de entorno completada." -ForegroundColor Magenta
