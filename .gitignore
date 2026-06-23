@@ -1,0 +1,15 @@
+# Entorno virtual y Python
+.venv/
+__pycache__/
+*.pyc
+
+# Base de datos (Nunca subas los archivos de lock)
+db/*.db-shm
+db/*.db-wal
+
+# Logs y basura
+logs/*.log
+.DS_Store
+
+# Tu ejecutable problemático
+Installer.exe
