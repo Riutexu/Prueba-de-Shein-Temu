@@ -1,16 +1,4 @@
-# --- CONFIGURACIÓN DE ENTORNO ---
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$ErrorActionPreference = "Stop"
-
-# --- CONFIGURACIÓN DE COLORES ---
-# Usamos directamente las secuencias de control ANSI estándar
-$CYAN_ON  = "$([char]27)[38;2;0;255;255m"
-$MAG_ON   = "$([char]27)[38;2;255;0;255m"
-$GRN_ON   = "$([char]27)[38;2;50;255;50m"
-$RESET    = "$([char]27)[0m"
-
-$ErrorActionPreference = "Stop"
-
+# --- 1. DEFINICIÓN DE FUNCIONES ---
 function Show-Menu {
     param([int]$Selected)
     Clear-Host
@@ -28,9 +16,26 @@ function Show-Menu {
     }
 }
 
-# (Resto de tu lógica igual, pero usa -ForegroundColor para todos los Write-Host)
+function Show-Bar {
+    param([int]$percent)
+    $width = 30
+    $filled = [math]::Floor(($percent / 100) * $width)
+    $bar = ("#" * $filled).PadRight($width, "-")
+    Write-Host -NoNewline "`r [ $bar ] $percent% " -ForegroundColor Magenta
+}
 
-# --- BUCLE DE INTERACCIÓN ---
+# --- 2. LÓGICA PRINCIPAL ---
+$ErrorActionPreference = "Stop"
+$desktop = [Environment]::GetFolderPath('Desktop')
+$targetDir = Join-Path $desktop "Prueba-de-Shein-Temu"
+
+# Configuración del entorno de trabajo
+if ($PWD.Path -ne $targetDir) {
+    if (-not (Test-Path $targetDir)) { New-Item -Path $targetDir -ItemType Directory | Out-Null }
+    Set-Location $targetDir
+}
+
+# Bucle de Interacción
 $sel = 0
 while ($true) {
     Show-Menu -Selected $sel
@@ -40,9 +45,23 @@ while ($true) {
     if ($key.VirtualKeyCode -eq 13) { break }
 }
 
-# --- PROCESAMIENTO ---
+# Ejecución
 Clear-Host
-Write-Host "$RGB_CYAN [*] INICIANDO PROCESO... $RESET`n"
+Write-Host " [*] INICIANDO PROCESO...`n" -ForegroundColor Cyan
 for ($i = 0; $i -le 100; $i+=10) { Show-Bar -percent $i; Start-Sleep -Milliseconds 100 }
 
-# ... (El resto de tu lógica del switch permanece igual)
+switch ($sel) {
+    0 { 
+        if (Test-Path ".venv\Scripts\python.exe") { & .venv\Scripts\python.exe run.py } 
+        else { Write-Host "`n [!] Entorno no detectado." -ForegroundColor Magenta; Start-Sleep -Seconds 2 }
+    }
+    1 { 
+        Write-Host "`n [!] Instalando dependencias..." -ForegroundColor Green
+        python -m venv .venv; .venv\Scripts\pip install -r requirements.txt
+    }
+    2 { 
+        Write-Host "`n [!] Limpiando entorno..." -ForegroundColor Magenta
+        Remove-Item .venv -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    3 { exit }
+}
