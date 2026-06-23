@@ -1,32 +1,31 @@
-# --- CONFIGURACIÓN DE ENTORNO ---
+# --- CONFIGURACIÓN DE ENTORNO BLINDADA ---
 $ErrorActionPreference = "Stop"
 
-# Obtenemos la ruta absoluta del archivo en ejecución
-$basePath = Split-Path -Parent $PSCommandPath
-# Si el script está en /src, el proyecto raíz es el padre de $basePath
-$projectRoot = Split-Path -Parent $basePath
+# EDITA ESTA LÍNEA CON LA RUTA REAL DE TU CARPETA
+$ManualRoot = "C:\Users\USER\Desktop\Prueba-de-Shein-Temu"
 
-# FORZAMOS el directorio de trabajo al de la raíz del proyecto
-Set-Location -Path $projectRoot
-
-# --- VERIFICACIÓN DE SEGURIDAD (DEBUG) ---
-$reqFile = Join-Path $projectRoot "requirements.txt"
-if (-not (Test-Path $reqFile)) {
-    Write-Host "--- ERROR DE RUTA DETECTADO ---" -ForegroundColor Red
-    Write-Host "Ruta de Proyecto calculada: $projectRoot" -ForegroundColor Yellow
-    Write-Host "Archivo buscado: $reqFile" -ForegroundColor Yellow
-    Write-Host "Contenido de la carpeta:" -ForegroundColor Cyan
-    Get-ChildItem $projectRoot | Select-Object Name
-    Write-Host "-------------------------------" -ForegroundColor Red
+# 1. Forzamos la ubicación física
+if (-not (Test-Path $ManualRoot)) {
+    Write-Host "[!] ERROR: No se encuentra la carpeta en: $ManualRoot" -ForegroundColor Red
+    Write-Host "[!] Por favor, edita la variable `$ManualRoot en el script." -ForegroundColor Yellow
     Start-Sleep -Seconds 10
     exit
 }
+Set-Location -Path $ManualRoot
 
-# --- CONFIGURACIÓN DE RUTAS ---
+# 2. Configuración de Rutas (Ahora son infalibles)
 $Cfg = [PSCustomObject]@{ 
-    TargetDir = $projectRoot
-    Python    = Join-Path $projectRoot ".venv\Scripts\python.exe"
-    Pip       = Join-Path $projectRoot ".venv\Scripts\pip.exe"
-    Reqs      = $reqFile
-    Run       = Join-Path $projectRoot "run.py"
+    TargetDir = $ManualRoot
+    Python    = Join-Path $ManualRoot ".venv\Scripts\python.exe"
+    Pip       = Join-Path $ManualRoot ".venv\Scripts\pip.exe"
+    Reqs      = Join-Path $ManualRoot "requirements.txt"
+    Run       = Join-Path $ManualRoot "run.py"
 }
+
+# --- VALIDACIÓN FINAL ---
+if (-not (Test-Path $Cfg.Reqs)) {
+    Write-Host "[!] ERROR: Archivo requirements.txt no hallado en $ManualRoot" -ForegroundColor Red
+    exit
+}
+
+# ... (El resto del código de Menú y Bucle es idéntico al anterior)
