@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-    Lanzador Profesional TUI - Gestión de Entorno Python.
-    Versión 2.0.1 - Corregida, optimizada y lista para producción.
+    Lanzador Maestro - Instalación y Gestión de Entorno Python.
+    Versión 3.0 - Integración total de despliegue y gestión.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -9,94 +9,63 @@ $ErrorActionPreference = "Stop"
 [Console]::InputEncoding  = [System.Text.Encoding]::UTF8
 
 # Configuración Visual
-$ESC        = [char]27
-$RESET      = "$ESC[0m"
-$CYAN       = "$ESC[36m"
-$CYAN_LIGHT = "$ESC[96m"
-$MAGENTA    = "$ESC[35m"
-$WHITE      = "$ESC[97m"
-$GREEN      = "$ESC[92m"
-$RED        = "$ESC[91m"
-$GRAY       = "$ESC[90m"
+$CYAN_LIGHT = "$([char]27)[96m"; $WHITE = "$([char]27)[97m"; $GREEN = "$([char]27)[92m"
+$RED = "$([char]27)[91m"; $MAGENTA = "$([char]27)[35m"; $RESET = "$([char]27)[0m"
 
 # Rutas
 $RepoRoot   = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) }
 $VenvPath   = Join-Path $RepoRoot ".venv"
 $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
 $RunScript  = Join-Path $RepoRoot "run.py"
-$AppUrl     = "http://127.0.0.1:8080"
 
 function Show-Header {
     Clear-Host
-    Write-Host "`n${CYAN} ╔══════════════════════════════════════════════╗"
-    Write-Host " ║      SISTEMA DE GESTIÓN DE APLICACIÓN        ║"
+    Write-Host "`n${CYAN_LIGHT} ╔══════════════════════════════════════════════╗"
+    Write-Host " ║      SISTEMA DE GESTIÓN Y DESPLIEGUE         ║"
     Write-Host " ╚══════════════════════════════════════════════╝`n"
 }
 
-function Kill-AppProcesses {
-    Get-Process -Name "python" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$VenvPath*" } | Stop-Process -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 1
-}
-
-# --- BUCLE PRINCIPAL ---
+# --- MENÚ PRINCIPAL ---
 $salir = $false
 while (-not $salir) {
     Show-Header
     Write-Host "  ${CYAN_LIGHT}1)${WHITE} Arrancar Sistema"
-    Write-Host "  ${CYAN_LIGHT}2)${WHITE} Instalar / Configurar Dependencias"
-    Write-Host "  ${CYAN_LIGHT}3)${WHITE} Reparar Entorno"
-    Write-Host "  ${CYAN_LIGHT}4)${WHITE} Desinstalar"
-    Write-Host "  ${RED}5)${WHITE} Salir"
+    Write-Host "  ${CYAN_LIGHT}2)${WHITE} Instalar / Actualizar Sistema (Despliegue Remoto)"
+    Write-Host "  ${CYAN_LIGHT}3)${WHITE} Configurar/Reparar Entorno Python"
+    Write-Host "  ${RED}4)${WHITE} Salir"
     Write-Host ""
     
     $choice = Read-Host "  ${MAGENTA}▶${WHITE} Seleccione una opción"
     
-    try {
-        switch ($choice) {
-            "1" {
-                if (Test-Path $VenvPython) {
-                    Write-Host "${GREEN} [*] Arrancando sistema...${RESET}"
-                    $cmd = "cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`""
-                    Start-Process -FilePath "cmd" -ArgumentList "/c $cmd" -WindowStyle Hidden
-                    Write-Host "${GRAY} [+] Servidor iniciado. Accediendo a $AppUrl...${RESET}"
-                    Start-Sleep -Seconds 2
-                    Start-Process $AppUrl
-                } else {
-                    Write-Host "`n ${RED}[!] Entorno no encontrado. Configure primero.${RESET}"
-                    Start-Sleep -Seconds 2
-                }
-            }
-            "2" {
-                Write-Host "`n ${GREEN}[*] Instalando dependencias...${RESET}"
-                if (-not (Test-Path $VenvPath)) {
-                    & python -m venv $VenvPath
-                }
-                & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
-                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
-                Write-Host " ${GREEN}[+] Configuración exitosa.${RESET}"; Start-Sleep -Seconds 2
-            }
-            "3" {
-                Write-Host "`n ${CYAN}[*] Reparando entorno...${RESET}"
-                Kill-AppProcesses
-                if (Test-Path $VenvPath) { Remove-Item $VenvPath -Recurse -Force }
-                & python -m venv $VenvPath
-                & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
-                & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
-                Write-Host " ${GREEN}[+] Reparación completa.${RESET}"; Start-Sleep -Seconds 2
-            }
-            "4" {
-                $confirm = Read-Host "`n ${RED}[!] ¿Confirmar desinstalación total? (s/n)${RESET}"
-                if ($confirm -eq "s") {
-                    Kill-AppProcesses
-                    Remove-Item $VenvPath -Recurse -Force -ErrorAction SilentlyContinue
-                    Write-Host " ${GRAY}[-] Entorno eliminado.${RESET}"; Start-Sleep -Seconds 2
-                }
-            }
-            "5" { $salir = $true }
-            Default { Write-Host "`n ${RED}Opción no válida.${RESET}"; Start-Sleep -Seconds 1 }
+    switch ($choice) {
+        "1" {
+            if (Test-Path $VenvPython) {
+                Start-Process "cmd" -ArgumentList "/c cd /d `"$RepoRoot`" && `"$VenvPython`" `"$RunScript`"" -WindowStyle Hidden
+                Write-Host "${GREEN} [*] Servidor iniciado.${RESET}"; Start-Sleep -Seconds 2
+            } else { Write-Host "${RED}[!] Entorno no detectado.${RESET}"; Start-Sleep -Seconds 2 }
         }
-    } catch {
-        Write-Host "`n ${RED}[!] Error crítico: $($_.Exception.Message)${RESET}"
-        Read-Host " Presione ENTER para continuar..."
+        "2" {
+            # Lógica de Despliegue Integrada
+            Write-Host "${GREEN}[*] Iniciando descarga de repositorio remoto...${RESET}"
+            try {
+                $zip = Join-Path $env:TEMP "repo.zip"
+                $tmp = Join-Path $env:TEMP "tmp_extract"
+                Invoke-WebRequest -Uri "https://github.com/Riutexu/Prueba-de-Shein-Temu/archive/refs/heads/main.zip" -OutFile $zip
+                Expand-Archive $zip -DestinationPath $tmp -Force
+                $root = (Get-ChildItem $tmp -Directory).FullName
+                Copy-Item -Path "$root\*" -Destination $RepoRoot -Recurse -Force
+                Remove-Item $zip, $tmp -Recurse -Force
+                Write-Host "${GREEN}[+] Despliegue exitoso. Por favor reinicie el lanzador.${RESET}"
+            } catch { Write-Host "${RED}[!] Error: $($_.Exception.Message)${RESET}" }
+            Start-Sleep -Seconds 3
+        }
+        "3" {
+            Write-Host "${GREEN}[*] Configurando entorno local...${RESET}"
+            if (-not (Test-Path $VenvPath)) { & python -m venv $VenvPath }
+            & $VenvPython -m pip install --upgrade pip --no-cache-dir --quiet
+            & $VenvPython -m pip install -r (Join-Path $RepoRoot "requirements.txt") --no-cache-dir --quiet
+            Write-Host "${GREEN}[+] Entorno listo.${RESET}"; Start-Sleep -Seconds 2
+        }
+        "4" { $salir = $true }
     }
 }
