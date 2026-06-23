@@ -46,17 +46,25 @@ do {
             
             if (Test-Path $reqPath) {
                 Show-Section "INSTALANDO DEPENDENCIAS"
+                
+                # Ejecutamos y capturamos el resultado
                 python -m venv "$targetDir\.venv"
                 & "$targetDir\.venv\Scripts\pip.exe" install -r $reqPath
                 
-                Show-Section "INSTALACION EXITOSA"
-                Show-Section "VERIFICANDO"
-                Start-Sleep -Seconds 1
-                
-                Show-Section "LANZANDO PROGRAMA AUTOMATICAMENTE"
-                & "$targetDir\.venv\Scripts\python.exe" "$targetDir\run.py"
+                # Verificamos si pip tuvo éxito (código de salida 0 es éxito)
+                if ($LASTEXITCODE -eq 0) {
+                    Show-Section "INSTALACION EXITOSA"
+                    Show-Section "VERIFICANDO"
+                    Start-Sleep -Seconds 1
+                    
+                    Show-Section "LANZANDO PROGRAMA AUTOMATICAMENTE"
+                    & "$targetDir\.venv\Scripts\python.exe" "$targetDir\run.py"
+                } else {
+                    Write-Host "`n[!] ERROR: La instalación de dependencias falló." -ForegroundColor Red
+                    Start-Sleep -Seconds 3
+                }
             } else {
-                Write-Host "[!] ERROR CRÍTICO: No se encuentra 'requirements.txt' en $reqPath" -ForegroundColor Red
+                Write-Host "`n[!] ERROR CRÍTICO: No se encuentra 'requirements.txt' en $reqPath" -ForegroundColor Red
                 Start-Sleep -Seconds 3
             }
         }
